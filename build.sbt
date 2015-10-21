@@ -7,5 +7,3 @@ libraryDependencies += "org.apache.kafka" %% "kafka" % kafkaVersion exclude("jav
 libraryDependencies += "org.apache.kafka" % "kafka-clients" % kafkaVersion exclude("javax.jms", "jms") exclude("com.sun.jmx", "jmxri") exclude("com.sun.jdmk", "jmxtools") withSources()
 
 libraryDependencies += "org.apache.zookeeper" % "zookeeper" % zookeeperVersion withSources()
-
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.1" % "test"
