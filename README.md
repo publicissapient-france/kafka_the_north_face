@@ -195,43 +195,28 @@ Maintenant que nous avons validé l'installation, nous allons codé :-)
 Vous avez déjà créé un producteur et un consommateur de données depuis la console avec les outils de Kafka.
 Nous allons maintenant créer un producteur de données avec du code et l'API 0.8.2.X de Kafka.	
 Kafka est par nature distribué et dynamique. Ainsi, le seul élément stable dans un cluster Kafka est l'adresse des noeuds Zookeeper. 
-Tout y est stocké, la liste des noeuds, des topics, des partitions, des noeuds leaders de partitions.
-La liste des étapes pour parvenir à écrire dans Kafka est:
+Tout y est stocké, la liste des noeuds, les topics, les partitions et leurs leaders et réplicats.
+Écrire dans Kafka consiste à :
 
-* création d'un client Zookeeper
-* récupération des adresses des noeuds Kafka (ou brokers)
-* instanciation d'un KafkaProducer
-* écriture dans le topic
+* créer un client Zookeeper
+* récupérer les adresses des noeuds Kafka (ou brokers)
+* instancier un KafkaProducer
+* écrire dans le topic
 
-### Création d'un client Zookeeper
+Pour se faire, vous allez devoir suivre les 4 TODO de la classes *fr.xebia.xebicon.kafka.Producer* en suivant les étapes décrites si dessous.
+Cette classe est une classe exécutable que vous pouvez lancer depuis SBT, Eclipse ou IntelliJ.
+
+### STEP_1_1: Création d'un client Zookeeper
 
 En supposant que votre Zookeeper est bien sur 127.0.0.1:2181, créer un client Zookeeper pour Kafka se fait comme suit:
 
-	import kafka.utils.ZKStringSerializer
-	import org.I0Itec.zkclient.ZkClient
-
-	val zkClient = new ZkClient("127.0.0.1:2181", 10000, 5000, ZKStringSerializer)
-
-
-	...
-
-
-	zkClient.close()
-	
-	
-Résultat attendu:
-
-	import kafka.utils.ZKStringSerializer
-    import org.I0Itec.zkclient.ZkClient
+    def connectToZookeeper(): ZkClient = {
+        import kafka.utils.ZKStringSerializer
     
+        new ZkClient("127.0.0.1:2181", 10000, 5000, ZKStringSerializer)
+    }
     
-    zkClient: org.I0Itec.zkclient.ZkClient = org.I0Itec.zkclient.ZkClient@427cfaef
-    
-    
-    res0: Unit = ()
-
-
-Vous pouvez déjà inclure l'appel à **client.close()** pour libérer les ressources à la fin de votre programme.
+NB: ZKStringSerializer est une classe spécifique à Kafka pour écrire/lire dans Zookeeper.    
 
 NB: dans un environnement de production, il est nécessaire de préciser l'adresse de l'ensemble des noeuds Zookeeper. 
 Zookeeper préfère ne pas donner de valeur plutôt qu'une mauvaise. Ainsi un client Zookeeper de connaître l'ensemble des noeuds pour toujours avoir la bonne version de la donnée.
@@ -240,46 +225,38 @@ Dans un environnement distribué, chaque noeud pour accepter des modifications d
 NB: cette portion n'est pas vraiment obligatoire. Dans un environnement où les noeuds Kafka sont stables avec IP,PORT connus, il n'est pas nécessaire d'aller les chercher dans Zookeeper.
 Cette partie de "service discovery" est néanmoins un classique dans les systèmes distribués et reste nécessaire pour le SimpleConsumer. Vous n'aurez donc pas perdu votre temps :)
 
-### Récupération des adresses des brokers
+### STEP_1_2: Récupération des adresses des brokers
 
 Maintenant que vous avez un client Zookeeper, vous devez y trouver les brokers Kafka. 
 Kafka fournit l'API pour le faire grâce à la classe *kafka.utils.ZkUtils*. Vous aurez alors la liste de tous les brokers du système.
 Il vous faudra ensuite concatener avec ',' la liste des attributs *connectionString* de chaque broker.
 
-Petite aide en Scala:
-	val connectionString = brokers.map(_.connectionString).mkString(",")
-
-Solution:
-
-	import kafka.utils.ZkUtils
+Petites aides en Scala:
 	
-	val brokers = ZkUtils.getAllBrokersInCluster(zkClient)
-    val connectionString = brokers.map(_.connectionString).mkString(",")	
-    
-Résultat attendu:
-
-    import kafka.utils.ZKStringSerializer
-    import org.I0Itec.zkclient.ZkClient
-    import kafka.utils.ZkUtils
-    
-    
-    zkClient: org.I0Itec.zkclient.ZkClient = org.I0Itec.zkclient.ZkClient@f41de1b
-    brokers: Seq[kafka.cluster.Broker] = ArrayBuffer(id:0,host:192.168.59.3,port:9092)
-    connectionString: String = 192.168.59.3:9092 // <-- LA LISTE AVEC VOTRE BROKER
-    
-    
-    res0: Unit = ()
-
+	//extrait de chaque broker son url de connection
+	def extractConnectionStringFrom(brokers: Seq[Broker]): Seq[String]
 	
+	//concatène les url en les séparant par une virgule
+	def join(brokers: Seq[String]): String
+	
+	
+SOLUTION
+	
+	def brokersFromZk: Seq[Broker] = 
+      ZkUtils.getAllBrokersInCluster(zkClient)
+      
+    join(
+      extractConnectionStringFrom(
+        brokersFromZk
+      )
+    )      
 
-### Instanciation d'un KafkaProducer
+### STEP_1_3: Instanciation d'un KafkaProducer
 
 La classe à utiiser dans Kafka est *org.apache.kafka.clients.producer.KafkaProducer<K,V>*
-Il n'y a pas grand chose à deviner à cette étape. On y retrouve quelques paramètres d'un producteur Kafka.
+Un producer a besoin d'un Map de configuration
 
-	import org.apache.kafka.clients.producer.KafkaProducer
-
-	val props = Map(
+	def props = Map(
       "value.serializer" -> "org.apache.kafka.common.serialization.StringSerializer",
       "key.serializer" -> "org.apache.kafka.common.serialization.StringSerializer",
       "partitioner.class" -> "kafka.producer.DefaultPartitioner",
@@ -288,10 +265,8 @@ Il n'y a pas grand chose à deviner à cette étape. On y retrouve quelques para
       "bootstrap.servers" -> connectionString,
       "acks" -> "all",
       "retries" -> "3",
-      "retry.backoff.ms" -> "500")
-
-    import scala.collection.convert.wrapAsJava._
-    val producer = new KafkaProducer[Any, Any](props)
+      "retry.backoff.ms" -> "500"
+    )
 
 Il s'agit ici d'un producteur de données String, String. Chaque message peut avoir une clé et possède forcément une valeur. 
 * *org.apache.kafka.common.serialization.StringSerializer* se contente de passer tout le contenu du message de type String en clair sur le disque. 
@@ -301,95 +276,37 @@ Il s'agit ici d'un producteur de données String, String. Chaque message peut av
 
 L'import de *wrapAsJava._* peut sembler magique. Il permet seulement de convertir la Map Scala en Map Java.
 
-Résultat attendu:
+SOLUTION:
 	
-	import java.util.concurrent.TimeUnit
-    
-    import kafka.utils.ZKStringSerializer
-    import org.I0Itec.zkclient.ZkClient
-    import kafka.utils.ZkUtils
-    import org.apache.kafka.clients.producer.KafkaProducer
-    import org.apache.kafka.clients.producer.ProducerRecord
-    
-    zkClient: org.I0Itec.zkclient.ZkClient = org.I0Itec.zkclient.ZkClient@1ad1a482
-    brokers: Seq[kafka.cluster.Broker] = ArrayBuffer(id:0,host:192.168.59.3,port:9092)
-    connectionString: String = 192.168.59.3:9092
-    
-    props: scala.collection.immutable.Map[String,String] = Map(producer.type -> sync, retries -> 3, partitioner.class -> kafka.producer.DefaultPartitioner, max.request.size -> 10000, bootstrap.servers -> 192.168.59.3:9092, value.serializer -> org.apache.kafka.common.serialization.StringSerializer, acks -> all, retry.backoff.ms -> 500, key.serializer -> org.apache.kafka.common.serialization.StringSerializer)
-    
-    import scala.collection.convert.`package`.wrapAsJava._
-    producer: org.apache.kafka.clients.producer.KafkaProducer[Any,Any] = org.apache.kafka.clients.producer.KafkaProducer@5f1ff152
-    
-	res0: Unit = ()
-    	
-    	
+    new KafkaProducer[Any, Any](props)
 
-### Écriture dans le topic
+### STEP_1_4: Écriture dans le topic
 
 L'envoie d'un message dans Kafka avec un KafkaProducer se fait à l'aide d'un objet de type *org.apache.kafka.clients.producer.ProducerRecord<K, V>*.
 
 Explorez l'API de KafkaProducer et ProducerRecord et envoyez un message à l'aide d'un ProducerRecord[Any,Any] sur le topic **xebicon**.
 
-Démarrer une session de console consumer sur le topic *xebicon*, vous devriez voir votre message passé.
-
-	/bin/kafka-console-consumer.sh --zookeeper 127.0.0.1:2181 --topic xebicon
+Petites aides en Scala:
+	
+	//bloque sur le future Java
+	 def blockOn[T](javaFuture:Future[T]):T
+	
+	//concatène les url en les séparant par une virgule
+	def join(brokers: Seq[String]): String
 
 SOLUTION:
-	import java.util.concurrent.TimeUnit
-	import org.apache.kafka.clients.producer.ProducerRecord
 
-	val recordMetadata = producer.send(new ProducerRecord[Any, Any]("xebicon", "hello")).get(5, TimeUnit.SECONDS)
-	
-	s"message persisted to: ${recordMetadata.topic()}, ${recordMetadata.partition()}, ${recordMetadata.offset()}"
-	
-Résultat attendu:
-	
-	import java.util.concurrent.TimeUnit
+	//TODO STEP_1_4
+    val messageSending: Future[RecordMetadata] = producer.send(new ProducerRecord[Any, Any]("xebicon", s"$instant: avg_load: $averageSystemLoad"))
+          
+    blockOn(messageSending)
     
-    import kafka.utils.ZKStringSerializer
-    import org.I0Itec.zkclient.ZkClient
-    import kafka.utils.ZkUtils
-    import org.apache.kafka.clients.producer.KafkaProducer
-    import org.apache.kafka.clients.producer.ProducerRecord
     
-    zkClient: org.I0Itec.zkclient.ZkClient = org.I0Itec.zkclient.ZkClient@1ad1a482
-    brokers: Seq[kafka.cluster.Broker] = ArrayBuffer(id:0,host:192.168.59.3,port:9092)
-    connectionString: String = 192.168.59.3:9092
-    
-    props: scala.collection.immutable.Map[String,String] = Map(producer.type -> sync, retries -> 3, partitioner.class -> kafka.producer.DefaultPartitioner, max.request.size -> 10000, bootstrap.servers -> 192.168.59.3:9092, value.serializer -> org.apache.kafka.common.serialization.StringSerializer, acks -> all, retry.backoff.ms -> 500, key.serializer -> org.apache.kafka.common.serialization.StringSerializer)
-    
-    import scala.collection.convert.`package`.wrapAsJava._
-    producer: org.apache.kafka.clients.producer.KafkaProducer[Any,Any] = org.apache.kafka.clients.producer.KafkaProducer@5f1ff152
-    
-    recordMetadata: org.apache.kafka.clients.producer.RecordMetadata = org.apache.kafka.clients.producer.RecordMetadata@69d0a23f
-    
-    res0: String = message persisted to: xebicon, 0, 7
-    
-    res1: Unit = ()
-
-
-### Écriture de façon continue dans le topic
-
-
-Pour rendre l'exercice plus interactif, nous allons créer un stream de données pour notre topic *xebicon* représentant la charge moyenne du système à interval régulier.
-
+NB: Thread.sleep(1000) est juste là pour ne pas saturer le système. Essayer de changer sa valeur pour voir la différence de charge sur votre système.    
 NB: vérifier dans vos préférences projet et IntelliJ/Eclipse que le projet et le compilateur Scala sont en JDK 1.8.
-
-Solution:
-
-    import java.time.Instant
-    import java.lang.management.ManagementFactory
     
-    Stream.continually(Instant.now()).foreach { instant =>
-      val averageSystemLoad = ManagementFactory.getOperatingSystemMXBean.getSystemLoadAverage
-      producer.send(new ProducerRecord[Any, Any]("xebicon", s"$instant: avg_load: $averageSystemLoad")).get(5, TimeUnit.SECONDS)
-    
-      Thread.sleep(1000)
-    }
-
-
-Résultat attendu dans la console:
-
+Dans votre kafka-console-consumer.sh, vous devriez voir dorénavant passer des données
+	
     2015-10-20T06:11:17.412Z: avg_load: 2.81005859375
     2015-10-20T06:11:18.934Z: avg_load: 2.81005859375
     2015-10-20T06:11:19.939Z: avg_load: 2.81005859375
@@ -397,7 +314,105 @@ Résultat attendu dans la console:
     2015-10-20T06:11:21.951Z: avg_load: 2.6650390625
 
 
-##Codons un consommateur haut niveau
+##Codons un consommateur haut-niveau
+
+En suivant la même démarche, nous allons coder un consommateur haut-niveau.
+Il fonctionne quasiment tout seul et offre un service de fail-over.
+Cette fois, nouswra allons travailler sur la classe *fr.xebia.xebicon.kafka.ConsumerHighLevel*.
+Lire avec ce consommateur depuis Kafka consiste à :
+* configuer un connector
+* créer un stream pour des couples topic/partitions
+* itérer sur les streams de manière concurrente
+
+### STEP_2_1: Configuration d'un connector
+
+L'API de haut niveau permet de créer très rapidement un consommateur. Pour ce faire, il lui faut:
+
+* l'adresse de Zookeeper
+* l'identifiant du group de consommation
+* les paramètres d'autocommit
+
+NB: oui, ce consommateur est en auto-commit à intervalle régulier. Il peut convenir à la majorité des cas mais pas forcément tous.
+Cela veut dire qu'il est possible d'avoir à traiter plusieurs fois le même message.
+En fonction de votre SLA, à vous de faire le choix qui convient.
+
+À l'aide de la classe *kafka.consumer.Consumer*, créer un consommateur avec les bonnes propriétés.
+
+
+SOLUTION:
+
+    def groupId = "xebicon_printer"
+    def zookeeper = "127.0.0.1:2181"
+    
+    val props = new Properties()
+
+    props.put("zookeeper.connect", zookeeper)
+    props.put("group.id", groupId)
+    props.put("zookeeper.session.timeout.ms", "400")
+    props.put("zookeeper.sync.time.ms", "200")
+    props.put("auto.commit.interval.ms", "1000")
+
+    Consumer.create(new ConsumerConfig(props))
+    
+### STEP_2_2: Création du stream
+    
+À partir du connector, il est possible de demander la création d'un stream sur un couple topic/partition.
+C'est l'API qui se charge ensuite de créer la connection avec le broker, initier le stream de données, puis les phases d'auto-commit.
+
+Créer donc un stream sur notre topic *xebicon* pour ses *4* partitions
+
+Petites aides en Scala:
+
+    //permet de récuperer les streams de la première partition demandée
+    def takeFirstPartitionOf(streams: collection.Map[String, List[KafkaStream[Array[Byte], Array[Byte]]]]): List[KafkaStream[Array[Byte], Array[Byte]]] =
+        streams.values.head
+
+SOLUTION:
+
+    def topic = "xebicon"
+    def numberOfPartitions = 4
+
+    def takeFirstPartitionOf(streams: collection.Map[String, List[KafkaStream[Array[Byte], Array[Byte]]]]): List[KafkaStream[Array[Byte], Array[Byte]]] =
+      streams.values.head
+
+    val streamsByTopic = consumer.createMessageStreams(Map(topic -> numberOfPartitions))
+
+    takeFirstPartitionOf(streamsByTopic)
+    
+### STEP_2_3: Itération sur les messages
+
+Un stream de message est principalement composé d'un itérateur de Array[Byte].
+Les partitions représentent le niveau de "parallélisation" d'un système Kafka.
+Nous allons donc ici créer un pool de thread par défaut et ainsi lire chaque partition dans un thread.
+
+Petites aides en Scala:
+    
+La méthode *.foreach* en Scala permet d'itérer sur tous les éléments d'un itérateur.
+
+    //cette ligne importe dans le contexte un pool de threads par défaut
+    import concurrent.ExecutionContext.Implicits.global
+    
+    Future {
+        //la portion de code ici est exécutée en asynchrone
+    }  
+    
+SOLUTION:
+    
+    def display(message: MessageAndMetadata[Array[Byte], Array[Byte]]): Unit = {
+      def payload: String = new String(message.message(), "UTF-8")
+      def partition: Int = message.partition
+      def offset: Long = message.offset
+
+      println(s"partition: $partition, offset: $offset: $payload")
+    }
+
+    import concurrent.ExecutionContext.Implicits.global
+    Future {
+      //TODO STEP_2_3
+      partitionStream.iterator().foreach(message => display(message))
+    }    
+
+## Codons un consommateur bas-niveau
 ### Récupération de la configuration du cluster pour un topic
 Toute la configuration du cluster est mise à jour par Kafka dans Zookeeper. Pour pouvoir consommer des messages, il faut récupérer dans les metadata du topic le nombre de partitions configurés. On rappelle qu'un topic n'est qu'un ensemble de partition, chaque partition étant une "file" de messages persistante.
 
@@ -411,7 +426,7 @@ Il faut:
 	val topicMetadata = AdminUtils.fetchTopicMetadataFromZk(topic, zkClient)
 
  	
- ### Se connecter à une partition
+### Se connecter à une partition
  Il existe à un instant au plus 1 noeud Kafka leader pour une partition d'un topic donné. 
  Pour faire simple, nous allons nous connecter à toutes les partitions du topic en une fois. Il faudra donc faire une boucle sur la liste des partitions que vous avez récupérer précédemment.
 
