@@ -410,7 +410,24 @@ SOLUTION:
     Future {
       //TODO STEP_2_3
       partitionStream.iterator().foreach(message => display(message))
-    }    
+    }   
+     
+     
+À ce stage, vous pouvez lancer la classe *fr.xebia.xebicon.kafka.ConsumerHighLevel* et voir les messages envoyés par le producer.
+Vous pouvez donc fermer le consommateur en CLI.
+
+###It's time to play
+
+Kafka agit comme un broker de messages. 
+Arrêtez le consommateur quelques secondes, relancer le, vous verrez alors que le consommateur reprend là où il s'était arrêté.
+Démarrez une seconde instance de Consumer, rien ne lui parviendra car la première JVM lit les messages du topic. Arrêter la première instance et la second prend le relai.
+
+Stoppez tous les consommateurs et changer le nombre de partitions lues à 2 dans la configuration du connecteur. Lancez deux instances du consommateur, les deux prennent 50% des messages.
+Stoppez en 1 et l'autre reprendra ses partitions.
+
+Le *High Level consumer* convient à la majorité des cas. Si l'autocommit n'est pas un problème, c'est cette API qu'il faut utiliser.
+
+Si par contre, vous souhaitez aller plus loin dans la gestion de votre stream, le parcourir à l'envers, par batch, gérer le commit manuellement, alors il faut descendre d'un cran et utiliser la *low level API*. Let's go!
 
 ## Codons un consommateur bas-niveau
 ### Récupération de la configuration du cluster pour un topic
