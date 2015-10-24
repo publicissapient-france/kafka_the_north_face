@@ -430,59 +430,158 @@ Le *High Level consumer* convient à la majorité des cas. Si l'autocommit n'est
 Si par contre, vous souhaitez aller plus loin dans la gestion de votre stream, le parcourir à l'envers, par batch, gérer le commit manuellement, alors il faut descendre d'un cran et utiliser la *low level API*. Let's go!
 
 ## Codons un consommateur bas-niveau
-### Récupération de la configuration du cluster pour un topic
-Toute la configuration du cluster est mise à jour par Kafka dans Zookeeper. Pour pouvoir consommer des messages, il faut récupérer dans les metadata du topic le nombre de partitions configurés. On rappelle qu'un topic n'est qu'un ensemble de partition, chaque partition étant une "file" de messages persistante.
 
-Il faut:
+Si créer un consommateur de haut-niveau est simple et très pratique, si l'on souhaite vraiment comprendre comment Kafka fonctionne, il faut aller regarder l'API de bas-niveau.
+On prend alors pleinement conscience de sa nature distribuée et de son mode de fonctionnement.
+
+Les étapes sont beaucoup plus nombreuses que précédemment. Nous n'allons simplifier certaines étapes.
+
+Le but de cet exercice est de comprendre comment est structuré la consommation de données dans Kafka. 
+Nous ne ferons pas la gestion du commit qui demanderait avec la version 0.8.2 trop de complexité de code à réaliser en si peu de temps.
+Nous allons plutôt parcourir parcourir tous les messages des partitions d'un topic, mais du plus récent au plus ancien!
+
+Pour y arriver, il faut:
 
 * créer un client Zookeeper
-* Chercher dans kafka.admin.AdminUtils la bonne méthode
+* récupérer tous les brokers
+* récupérer depuis zookeeper les métadonnées du topic concerné
+* trouver le broker leader de chaque partition
+* créer une connexion à ce broker
+* chercher l'offset du plus ancien et plus récent message consommé
+* récupérer les messages
+
+On se retrousse les manches, on prend son piolet et on y va!
+
+### STEP_3_1: Création d'un client Zookeeper
+
+Rien de bien difficile ici, nous avons déjà effectué cette étape en STEP_1_1.
 
 
-	// Réponse
-	val topicMetadata = AdminUtils.fetchTopicMetadataFromZk(topic, zkClient)
+SOLUTION: 
 
+    def connectToZookeeper(): ZkClient = {
+        import kafka.utils.ZKStringSerializer
+    
+        new ZkClient("127.0.0.1:2181", 10000, 5000, ZKStringSerializer)
+    }
+
+### STEP_3_2: Récupération de la configuration du cluster pour un topic
+
+Pour pouvoir consommer des messages, il faut récupérer dans les metadata du topic le nombre de partitions configurés. 
+
+À vous de chercher dans *kafka.admin.AdminUtils* la bonne méthode.
+
+SOLUTION:
+
+    def fetchTopicMetadata(zkClient: ZkClient): TopicMetadata = {
+        import kafka.admin.AdminUtils
+    
+        AdminUtils.fetchTopicMetadataFromZk("xebicon", zkClient)
+    }
  	
-### Se connecter à une partition
- Il existe à un instant au plus 1 noeud Kafka leader pour une partition d'un topic donné. 
- Pour faire simple, nous allons nous connecter à toutes les partitions du topic en une fois. Il faudra donc faire une boucle sur la liste des partitions que vous avez récupérer précédemment.
+### STEP_3_3: Rechercher le leader de chaque partition
+Il existe à chaque instant au plus 1 noeud Kafka leader pour une partition d'un topic donné. 
 
-Il faut: 
+À vous de fouiller dans la réponse précédente pour trouver chaque leader de chaque partition. 
 
-* fouiller dans la réponse précédente pour trouver chaque leader de chaque partition. 
-* se connecter au broker en instantiant un kafka.consumer.SimpleConsumer par partition.
+La méthode *findPartitionLeader* retourne *Option[Broker]* car il se peut qu'il n'y ait pas de leader à ce moment là. 
 
-	// Réponse
-	val partitionsBroker: Map[Int, Option[Broker]] = topicMetadata.partitionsMetadata.groupBy(_.partitionId).toMap.mapValues(_.head.leader)
+Petites aides en Scala:
 
-	val partitionsConsumer: Map[Int, Option[SimpleConsumer]] = partitionsBroker.mapValues{optionalBroker => 
-		optionalBroker.map{leader => new SimpleConsumer(leader.host, leader.port, 10000, 64000, "aCLientId")}
-	}
+    //permet de transformer l'objet TopicMetadata en Map avec clé le numéro de la partition, en valeur les métadatas de la partition.
+    def asMap(topicMetadata: TopicMetadata): Map[Int, PartitionMetadata] = {
+        topicMetadata.partitionsMetadata.groupBy(_.partitionId).toMap.mapValues(_.head)
+    }
+    
+    //Sur un objet de type Map, mapValues permet d'extraire une donnée des valeurs d'une MAP.
+    partitionsMetadata.mapValues(metadata => ???)
 
-### Trouver l'offset de démarrage de consommation
-Une partition est un journal en ajout seulement. Chaque message possède un numéro unique au sein d'une même partition. Cet identifiant, issu d'un compteur monotonique (strictement croissant), est nommé offset. 
-Pour chaque requête de données à Kafka, on lui précise le nombre de messages que l'on veut recevoir, et depuis quelle position, offset.
+SOLUTION:
+    
+    def findPartitionLeader(topicMetadata: TopicMetadata): Map[Int, Option[Broker]] = {
+        import kafka.api.PartitionMetadata
+        
+        def asMap(topicMetadata: TopicMetadata): Map[Int, PartitionMetadata] = {
+          topicMetadata.partitionsMetadata.groupBy(_.partitionId).toMap.mapValues(_.head)
+        }
+        
+        val partitionsMetadata: Map[Int, PartitionMetadata] = asMap(topicMetadata)
+        
+        partitionsMetadata.mapValues(metadata => metadata.leader)
+    }
+
+### STEP_3_4: Connexion aux brokers
+À ce stade, nous avons la liste des leaders de chaque partition. Dans le cas où le leader existe, créer une connexion à l'aide de la classe *import kafka.consumer.SimpleConsumer*.
+
+Petites aides en Scala:
+
+    //Sur un objet de type Map, mapValues permet d'extraire une donnée des valeurs d'une MAP.
+    partitionsBroker.mapValues { optionalBroker =>
+          ???
+    }
+    
+    //Sur un objet de type Option, map permet d'extraire une donnée si la valeur de l'option existe
+    optionalBroker.map { leader =>
+        ???
+    }
+ 
+SOLUTION:
+
+  def connectTo(leader: Broker): SimpleConsumer = {
+    //TODO STEP_3_4
+    new SimpleConsumer(leader.host, leader.port, 10000, 64000, "xebicon-printer")
+  }
+
+
+### STEP_3_5: Trouver l'offset de démarrage de consommation
+Une partition est un journal en ajout seul. Chaque message possède un numéro unique au sein d'une même partition. Cet identifiant, issu d'un compteur monotonique (strictement croissant), est nommé *offset*. 
+Pour chaque requête de données à Kafka, on lui précise le nombre de messages que l'on veut recevoir, et depuis quel offset.
 
 Il faut: 
 
 	* trouver sur SimpleConsumer une méthode nous permettant de trouver l'identifiant du premier offset connu de chaque partition.
+	
+Petites aides en Scala:
+	
+	//permet de faire une boucle depuis latestOffset à earliestOffset par étape de -1 
+	//et stocke la variable d'itération dans offset
+    for (offset <- latestOffset.to(earliestOffset, step = -1))
+    yield {
 
-	//Réponse
-	consumer.earliestOrLatestOffset(topicAndPartition, OffsetRequest.EarliestTime, Request.OrdinaryConsumerId)	
+        ...
+    }
+
+SOLUTION: 
+    def findEarliestOffset(partition: Int, consumer: SimpleConsumer): Long = {
+        consumer.earliestOrLatestOffset(new TopicAndPartition("xebicon", partition), OffsetRequest.EarliestTime, Request.OrdinaryConsumerId)
+    }
+    
+    def findLatestOffset(partition: Int, consumer: SimpleConsumer): Long = {
+        consumer.earliestOrLatestOffset(new TopicAndPartition("xebicon", partition), OffsetRequest.LatestTime, Request.OrdinaryConsumerId)
+    }	
 
 
 NB: on pourrait aussi lancer le consommateur depuis la fin courante de la file. Ainsi, le consommateur ne recevrait de messages que lorsqu'un nouveau serait posté.
 
-### Faire une requête de données
+### STEP_3_6: Faire une requête de données
 Maintenant que nous avons la connexion au leader et l'offset à demander, il n'y a plus qu'à récupérer les infos. Dans Kafka, on ne demande pas N messages. On demande une taille à récupérer. Dans la réponse, nous aurons ensuite un itérateur permettant de parcourir chaque message reçu. Il est donc **important** de connaître la taille des messages que l'on manipule. Cela semble bizarre au début mais cela se révèle être un atout majeur en terme de performance. En effet, toutes les I/O se mesurent en Bytes, network, buffer, disque... en ne manipulant que des tailles en bytes, il est ainsi d'être le plus précis possible pour le tuning de performance.
 
-Il faut
+Il faut:
 
 	* créer une FetchRequest grâce au FetchRequestBuilder. 
 	* l'exécuter avec le SimpleConsumer
-	* itérer sur l'Iterator de MessageSet 
+	
+Petites aides en Scala:
+	
+	//permet de faire une boucle depuis latestOffset à earliestOffset par étape de -1 
+	//et stocke la variable d'itération dans offset
+    for (offset <- latestOffset.to(earliestOffset, step = -1))
+    yield {
 
-	//Réponse
+        ...
+    }	
+
+SOLUTION:
 	val request = new FetchRequestBuilder()
         .clientId(groupId)
         .addFetch(topic, partitionId, nextOffsetToFetch, maxMessageSize * count)
@@ -494,59 +593,46 @@ Il faut
 
 NB: il est possible que Kafka vous envoie des messages un peu avant l'offset qui est demandé (pour des raisons d'optimisation). Si le côté transactionnel est important pour vous, pensez à filtrer sur les offsets des messages reçus.   
 
+### STEP_3_7: Afficher le message
+Le travail est presque terminé. Sur l'objet de type "FetchResponse" il est possible de récupérer les messages grâce à la méthode "messageSet".
+Celui-ci fournit un itérateur sur les messages reçu aux travers de ByteBuffers.
 
-### Commit
+NB: Au moment de la requête, il faut indiquer une taille de récupération au broker Kafka.
+Le stream de données est découpé en message côté client.
 
-Vous l'aurez ainsi remarqué, c'est le consommateur qui a la responsabilité de maintenir l'offset de lecture. Le broker Kafka ne sait pas à priori qui a déjà consommé quoi.
-Il existe deux façons proposées par Kafka pour maintenir cette information, mais vous pouvez utiliser la votre. Il suffit juste de maintenir quelque part ce fameux offset de consommation.
-Initialement, Kafka stockait les offsets dans Zookeeper. Cette solution fortement cohérente en système distribué s'est avéré trop peu performante. 
-La seconde solution proposée par Kafka est de stocké lui même l'offset dans un topic maintenu par le cluster. Il existe un noeud particulier dans le cluster qui joue le rôle du coordinateur à qui on peut demander les offsets et de "commiter" un offset pour un groupe de consommateurs, topic et partition.
+Itérer maintenant sur le messageSet et récupérer le premier message pour l'afficher.
 
-Pour trouver ce coordinateur
+Petites aides en Scala:
+ 
+    //permet de prendre le premier élément de l'itérateur, d'extraite le message et d'effectuer un traitement dessus
+    ... .iterator.take(1).foreach {
+            
+        case MessageAndOffset(message, readOffset) =>
+    
+    }
 
-Il faut:
+    //permet d'extraite le payload d'un message
+    def readBytes(message: Message): String = {
+      val content = Array.ofDim[Byte](message.payloadSize)
+      message.payload.get(content, 0, message.payloadSize)
+      val payload = new String(content, "UTF-8")
+      payload
+    }    
+    
+SOLUTION:
 
-	* boucler sur la liste des brokers et s'arrêter au premier qui fonctionne (ou recommencer jusqu'à ce que cela fonctionne)
-	* créer un blockingChannel sur un broker
-		val channel = new BlockingChannel(host, port, bufferSize, bufferSize, socketTimeout)
-        channel.connect()
-	* Faire une requête ConsumerMetadataRequest 
-		channel.send(new ConsumerMetadataRequest(groupId))
-        val reply = ConsumerMetadataResponse.readFrom(channel.receive().buffer)
-    * S'il existe un coordinateur, il faut s'y connecter
-    * Faire un commit 
-	    val request = OffsetCommitRequest(
-	      groupId,
-	      Map(topicAndPartition -> OffsetAndMetadata(offset)),
-	      versionId = 1
-	    )
+    def consume(partition: Int, fetchReply: FetchResponse) {
+        def readBytes(message: Message): String = {
+            val content = Array.ofDim[Byte](message.payloadSize)
+            message.payload.get(content, 0, message.payloadSize)
+            new String(content, "UTF-8")
+        }
 
-	    println(s"Committing offset <$offset> to partition <$partition>:<$groupId>")
-	    val reply = Try {
-	      channel.send(request)
-	      OffsetCommitResponse.readFrom(channel.receive().buffer)
-	    }
+        fetchReply.messageSet("xebicon", partition).iterator.take(1).foreach {
+            case MessageAndOffset(message, readOffset) =>
+                def offset: Long = readOffset
+                val payload: String = readBytes(message)
 
-	    reply.map(_.commitStatus(topicAndPartition)).filter(_ == NoError)
-
-Pour lire cette valeur et ainsi recommencer à lire depuis le dernier offset connu, il faut :
-
-	* sur le channel du coordinateur, faire une requête OffsetFetchRequest
-		val request = OffsetFetchRequest(groupId, List(topicAndPartition))
-		channel.send(request)
-        OffsetFetchResponse.readFrom(channel.receive().buffer)
-
-Vous pouvez ainsi récupérer le dernier offset connu, à la prochaine requête, vous pourez utiliser cette valuer.
-
-
-
-## Et ce n'est pas fini!
-
-Il manque encore plein de choses dans cette implem. Le cluster est dynamique, le coordinateur peut changer de noeud, les partitions peuvent être réassignées sur un autre noeud. Il faut
-
-* Écouter les événements depuis ZK pour suivre les assignements des partitions
-* Réessayer plusieurs fois certaines action quand le cluster n'est pas stable (en phase de transition)
-* Il se peut que'offset commité n'existe plus dans Kafka, il faut ainsi s'assurer qu'il existe supérieur au premier offset connu...
-
-
-
+            println(s"partition: $partition, offset: $offset. $payload")
+        }
+    }
