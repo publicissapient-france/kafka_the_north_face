@@ -1,16 +1,6 @@
 #Kafka par la face nord
 
 
-##Présentation de l'atelier
-###Si vous choisissez Scala
-Il existe dans Eclipse (avec le Scala Eclipse IDE) comme dans IntelliJ la notion de worksheet. 
-L'écran est partagé en deux, un éditeur sur la gauche et une fenêtre d'évaluation sur la droite.
-La partie gauche permet d'écrire du code Scala sous forme de scripts. Il sera exécuter à interval régulier. Le résultat de l'exécution du programme sera affiché sur le côté droit de l'écran.
-
-###Si vous choisissez Java
-Il n'existe pas encore de REPL en Java < 9, du coup, vous devrez écrire une classe Main pour résoudre les exercices suivants.
-
-
 ## Lancement de l'infrastructure
 Un cluster nécessite deux types de noeuds: Zookeeper et Kafka.
 
@@ -107,7 +97,7 @@ Nous allons créer un topic pour cet atelier. Il sera répliqué une seule fois 
 
     ./bin/kafka-topics.sh --create --topic xebicon --partition 4 --replication-factor 1 --zookeeper 127.0.0.1:2181
     
-Vous remarquerez que nous de discutons par directement avec Kafka mais seulement avec Zookeeper. 
+Vous remarquerez que nous ne discutons pas directement avec Kafka mais seulement avec Zookeeper.
 Kafka est par nature distribué, chaque broker surveille Zookeeper. L'ensemble se coordonne ensuite pour avec un état cohérent.
 Ainsi après la création du topic, vous avez du voir des logs passer dans les brokers Kafka.
 
@@ -120,7 +110,7 @@ Nous allons maintenant vérifier notre topic:
     	Topic: xebicon	Partition: 2	Leader: 	Replicas: 2	Isr: 2
     	Topic: xebicon	Partition: 3	Leader: 	Replicas: 1	Isr: 1
     	
-Dans mon cas, les partitions 0 et 2 sont gérées par le broker 2, 1 et 3 par le broker 1. 
+Dans mon cas, les partitions 0 et 2 sont gérées par le broker 2, 1 et 3 par le broker 1.
 Notez qu'il n'y a pas encore de leader.
 
 
@@ -130,7 +120,7 @@ La distribution Kafka vient avec un consommateur basique en ligne de commande. N
  
     ./bin/kafka-console-consumer.sh --topic xebicon --zookeeper 127.0.0.1:2181
     
-Rien ne se passe pour l'instant car il n'y a pas de production de données. Par contre, vous aurez remarqué que des logs sont apparus dans les brokers.
+Rien ne se passe pour l'instant car il n'y a pas de production de données. Par contre, vous aurez remarqué que des logs sont apparues dans les brokers.
 Maintenant qu'il y a du trafic sur Kafka, chaque partition a trouvé son leader.
 
     ./bin/kafka-topics.sh --describe  --topic xebicon --zookeeper 127.0.0.1:2181
@@ -189,7 +179,7 @@ Dans chaque partition, un fichier a été créé pour indexer les données et le
 Enfin, à l'intérieur des fichiers se trouvent les messages.
 
 
-Maintenant que nous avons validé l'installation, nous allons codé :-)
+Maintenant que nous avons validé l'installation, nous allons coder :-)
 
 ##Codons un producteur de données
 Vous avez déjà créé un producteur et un consommateur de données depuis la console avec les outils de Kafka.
@@ -482,9 +472,9 @@ SOLUTION:
 ### STEP_3_3: Rechercher le leader de chaque partition
 Il existe à chaque instant au plus 1 noeud Kafka leader pour une partition d'un topic donné. 
 
-À vous de fouiller dans la réponse précédente pour trouver chaque leader de chaque partition. 
+À vous de fouiller dans la réponse précédente pour trouver le leader de chaque partition.
 
-La méthode *findPartitionLeader* retourne *Option[Broker]* car il se peut qu'il n'y ait pas de leader à ce moment là. 
+La méthode *findPartitionLeader* retourne *Option[Broker]* car il se peut qu'il n'y ait pas de leader à cet instant.
 
 Petites aides en Scala:
 
@@ -541,17 +531,8 @@ Il faut:
 
 	* trouver sur SimpleConsumer une méthode nous permettant de trouver l'identifiant du premier offset connu de chaque partition.
 	
-Petites aides en Scala:
-	
-	//permet de faire une boucle depuis latestOffset à earliestOffset par étape de -1 
-	//et stocke la variable d'itération dans offset
-    for (offset <- latestOffset.to(earliestOffset, step = -1))
-    yield {
+SOLUTION:
 
-        ...
-    }
-
-SOLUTION: 
     def findEarliestOffset(partition: Int, consumer: SimpleConsumer): Long = {
         consumer.earliestOrLatestOffset(new TopicAndPartition("xebicon", partition), OffsetRequest.EarliestTime, Request.OrdinaryConsumerId)
     }
@@ -568,7 +549,7 @@ Maintenant que nous avons la connexion au leader et l'offset à demander, il n'y
 
 Il faut:
 
-	* créer une FetchRequest grâce au FetchRequestBuilder. 
+	* créer une FetchRequest grâce au kafka.api.FetchRequestBuilder.
 	* l'exécuter avec le SimpleConsumer
 	
 Petites aides en Scala:
@@ -585,7 +566,6 @@ SOLUTION:
 	val request = new FetchRequestBuilder()
         .clientId(groupId)
         .addFetch(topic, partitionId, nextOffsetToFetch, maxMessageSize * count)
-        .maxWait(fetchTimeout)
         .build()
 
     val fetchReply = consumer.fetch(request)
