@@ -606,9 +606,7 @@ Consumer.create(new ConsumerConfig(props))
 def topic = "xebicon"
 def numberOfPartitions = 4
 
-val streamsByTopic = consumer.createMessageStreams(Map(topic -> numberOfPartitions))(topic)
-
-takeFirstPartitionOf(streamsByTopic)
+consumer.createMessageStreams(Map(topic -> numberOfPartitions))(topic)
                         </code></pre>
                     </section>
                 </section>
@@ -772,7 +770,7 @@ def connectToZookeeper(): ZkClient = {
                     <section>
                         <pre><code class="hljs" data-trim>
 def fetchTopicMetadata(zkClient: ZkClient): TopicMetadata = {
-import kafka.admin.AdminUtils
+    import kafka.admin.AdminUtils
 
     AdminUtils.fetchTopicMetadataFromZk("xebicon", zkClient)
 }
@@ -996,8 +994,7 @@ def requestData(partition: Int, consumer: SimpleConsumer, offset: Long): FetchRe
 def readBytes(message: Message): String = {
     val content = Array.ofDim[Byte](message.payloadSize)
     message.payload.get(content, 0, message.payloadSize)
-    val payload = new String(content, "UTF-8")
-payload
+    new String(content, "UTF-8")
 }
                         </code></pre>
                     </section>
