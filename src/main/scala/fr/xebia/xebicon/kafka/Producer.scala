@@ -81,10 +81,11 @@ object Producer {
       val averageSystemLoad = ManagementFactory.getOperatingSystemMXBean.getSystemLoadAverage
 
       def data = s"$instant: avg_load: $averageSystemLoad"
-      
-      //TODO STEP_1_4
-      ???
-      
+
+      val messageSending: Future[RecordMetadata] = producer.send(new ProducerRecord[Any, Any]("xebicon", data))
+
+      blockOn(messageSending)
+
       Thread.sleep(1000)
     }
   }
