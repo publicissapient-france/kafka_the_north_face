@@ -35,8 +35,20 @@ object Producer {
     import kafka.utils.ZkUtils
     import kafka.cluster.Broker
 
-    //TODO STEP_1_2
-    ???
+    def extractConnectionStringFrom(brokers: Seq[Broker]): Seq[String] =
+      brokers.map(_.connectionString)
+
+    def join(brokers: Seq[String]): String =
+      brokers.mkString(",")
+
+    def brokersFromZk: Seq[Broker] =
+      ZkUtils.getAllBrokersInCluster(zkClient)
+
+    join(
+      extractConnectionStringFrom(
+        brokersFromZk
+      )
+    )
   }
 
   def createKafkaProducer(connectionString:String): KafkaProducer[Any, Any] = {
