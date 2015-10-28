@@ -44,8 +44,7 @@ object ConsumerHighLevel {
     def topic = "xebicon"
     def numberOfPartitions = 4
 
-    //TODO STEP_2_2
-    ???
+    consumer.createMessageStreams(Map(topic -> numberOfPartitions))(topic)
   }
 
   def consumeStreamFrom(partitionStream: KafkaStream[Array[Byte], Array[Byte]]): Unit = {
