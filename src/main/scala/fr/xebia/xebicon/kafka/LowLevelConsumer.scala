@@ -58,19 +58,17 @@ object LowLevelConsumer {
   }
 
   def findEarliestOffset(partition: Int, consumer: SimpleConsumer): Long = {
-    //TODO STEP_3_5
     def earliestOffsetRequest = OffsetRequest.EarliestTime
     def consumerId = Request.OrdinaryConsumerId
-    
-    ???
+
+    consumer.earliestOrLatestOffset(new TopicAndPartition("xebicon", partition), earliestOffsetRequest, consumerId)
   }
 
   def findLatestOffset(partition: Int, consumer: SimpleConsumer): Long = {
-    //TODO STEP_3_5
     def latestOffsetRequest = OffsetRequest.LatestTime
     def consumerId = Request.OrdinaryConsumerId
-    
-    ???
+
+    consumer.earliestOrLatestOffset(new TopicAndPartition("xebicon", partition), latestOffsetRequest, consumerId)
   }
 
   def consumePartition(partition: Int, leader: Broker): IndexedSeq[Unit] = {
