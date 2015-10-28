@@ -90,11 +90,14 @@ object LowLevelConsumer {
     def numberOfMessage = 1
     def clientId = "xebicon-printer"
     def topic = "xebicon"
-    
-    //TODO STEP_3_6
-    ???
-  }
 
+    val request = new FetchRequestBuilder()
+      .clientId(clientId)
+      .addFetch(topic, partition, offset, numberOfMessage * messageMaxSize)
+      .build()
+
+    consumer.fetch(request)
+  }
   def consume(partition: Int, fetchReply: FetchResponse) {
     def readBytes(message: Message): String = {
       val content = Array.ofDim[Byte](message.payloadSize)
