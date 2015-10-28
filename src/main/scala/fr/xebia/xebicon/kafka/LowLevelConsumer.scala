@@ -46,10 +46,13 @@ object LowLevelConsumer {
   def findPartitionLeader(topicMetadata: TopicMetadata): Map[Int, Option[Broker]] = {
     import kafka.api.PartitionMetadata
 
-    //TODO STEP_3_3
-    ???
-  }
+    def asMap(topicMetadata: TopicMetadata): Map[Int, PartitionMetadata] = {
+      topicMetadata.partitionsMetadata.groupBy(_.partitionId).toMap.mapValues(_.head)
+    }
+    val partitionsMetadata: Map[Int, PartitionMetadata] = asMap(topicMetadata)
 
+    partitionsMetadata.mapValues(metadata => metadata.leader)
+  }
   def connectTo(leader: Broker): SimpleConsumer = {
     //TODO STEP_3_4
     ???
