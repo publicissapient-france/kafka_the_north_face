@@ -54,8 +54,7 @@ object LowLevelConsumer {
     partitionsMetadata.mapValues(metadata => metadata.leader)
   }
   def connectTo(leader: Broker): SimpleConsumer = {
-    //TODO STEP_3_4
-    ???
+    new SimpleConsumer(leader.host, leader.port, 10000, 64000, "xebicon-printer")
   }
 
   def findEarliestOffset(partition: Int, consumer: SimpleConsumer): Long = {
