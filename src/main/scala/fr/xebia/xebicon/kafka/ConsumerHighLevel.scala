@@ -27,9 +27,16 @@ object ConsumerHighLevel {
 
     def groupId = "xebicon_printer"
     def zookeeper = "127.0.0.1:2181"
-    
-    //TODO STEP_2_1
-    ???
+
+    val props = new Properties()
+
+    props.put("zookeeper.connect", zookeeper)
+    props.put("group.id", groupId)
+    props.put("zookeeper.session.timeout.ms", "400")
+    props.put("zookeeper.sync.time.ms", "200")
+    props.put("auto.commit.interval.ms", "1000")
+
+    Consumer.create(new ConsumerConfig(props))
   }
 
   def createStream(consumer: ConsumerConnector): List[KafkaStream[Array[Byte], Array[Byte]]] = {
