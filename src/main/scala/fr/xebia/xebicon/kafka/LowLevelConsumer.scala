@@ -105,8 +105,12 @@ object LowLevelConsumer {
       new String(content, "UTF-8")
     }
 
-    //TODO STEP_3_7
-    ???
+    fetchReply.messageSet("xebicon", partition).iterator.take(1).foreach {
+      case MessageAndOffset(message, readOffset) =>
+        def offset: Long = readOffset
+        val payload: String = readBytes(message)
+        println(s"partition: $partition, offset: $offset. $payload")
+    }
   }
 
 }
