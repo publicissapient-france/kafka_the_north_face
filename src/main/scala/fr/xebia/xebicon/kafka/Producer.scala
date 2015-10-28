@@ -54,8 +54,16 @@ object Producer {
   def createKafkaProducer(connectionString:String): KafkaProducer[Any, Any] = {
     import scala.collection.convert.wrapAsJava._
 
-    //TODO STEP_1_3
-    ???
+    def props = Map(
+      "value.serializer" -> "org.apache.kafka.common.serialization.StringSerializer",
+      "key.serializer" -> "org.apache.kafka.common.serialization.StringSerializer",
+      "partitioner.class" -> "kafka.producer.DefaultPartitioner",
+      "max.request.size" -> "10000", "acks" -> "all",
+      "bootstrap.servers" -> connectionString,
+      "retries" -> "3", "retry.backoff.ms" -> "500"
+    )
+
+    new KafkaProducer[Any, Any](props)
   }
 
   def produceData(producer: KafkaProducer[Any, Any]): Unit = {
