@@ -27,8 +27,7 @@ object Producer {
   def connectToZookeeper(): ZkClient = {
     import kafka.utils.ZKStringSerializer
 
-    //TODO STEP_1_1
-    ???
+    new ZkClient("127.0.0.1:2181", 10000, 5000, ZKStringSerializer)
   }
 
   
