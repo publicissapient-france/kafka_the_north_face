@@ -36,12 +36,11 @@ object LowLevelConsumer {
 
     new ZkClient("127.0.0.1:2181", 10000, 5000, ZKStringSerializer)
   }
-  
+
   def fetchTopicMetadata(zkClient: ZkClient): TopicMetadata = {
     import kafka.admin.AdminUtils
 
-    //TODO STEP_3_2
-    ???
+    AdminUtils.fetchTopicMetadataFromZk("xebicon", zkClient)
   }
 
   def findPartitionLeader(topicMetadata: TopicMetadata): Map[Int, Option[Broker]] = {
