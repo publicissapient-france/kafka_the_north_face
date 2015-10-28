@@ -186,7 +186,6 @@ get /brokers/ids/2
 
 				<section>
 					<h2>Kafka CLI</h2>
-                    <section></section>
 					<section>
 						<p>Nous allons créer un topic pour cet atelier. Il sera répliqué une seule fois avec 4 partitions.</p>
 					</section>
@@ -198,7 +197,7 @@ get /brokers/ids/2
 					</section>
 					<section>
 						<p>Vous remarquerez que nous ne discutons pas directement avec Kafka mais seulement avec Zookeeper.</p>
-						<p>Kafka est par nature distribué, chaque broker surveille Zookeeper. L'ensemble se coordonne ensuite pour avec un état cohérent.</p>
+						<p>Kafka est par nature distribué, chaque broker surveille Zookeeper. L'ensemble se coordonne ensuite pour avoir un état cohérent.</p>
 					</section>
 					<section>
 						<h3>Vérification</h3>
@@ -403,7 +402,6 @@ def props = Map(
     "key.serializer" -> "org.apache.kafka.common.serialization.StringSerializer",
     "partitioner.class" -> "kafka.producer.DefaultPartitioner",
     "max.request.size" -> "10000",
-    "producer.type" -> "sync",
     "bootstrap.servers" -> connectionString,
     "acks" -> "all",
     "retries" -> "3",
@@ -424,10 +422,6 @@ def props = Map(
                         <p>est un paramètre important. Il s'agit de la taille maximum autorisée. Au dessus, le producteur lancer une exception. Nous verrons son importance côté consommateur plus tard dans l'exercice.</i></p>
                     </section>
                     <section>
-                        <p><i>producer.type</i></p>
-                        <p>crée ici un producteur synchrone. Cela permet d'avoir les Ack du cluster mais par contre empêche l'utilisation en mode "batch".</i></p>
-                    </section>
-                    <section>
                         <p><i>import ...wrapAsJava._</i></p>
                         <p>peut sembler magique. Cela permet seulement de convertir la Map Scala en Map Java.</p>
                     </section>
@@ -436,7 +430,20 @@ def props = Map(
                     </section>
                     <section>
                         <pre><code class="hljs" data-trim>
-new KafkaProducer[Any, Any](props)
+def createKafkaProducer(connectionString:String): KafkaProducer[Any, Any] = {
+    import scala.collection.convert.wrapAsJava._
+
+    def props = Map(
+        "value.serializer" -> "org.apache.kafka.common.serialization.StringSerializer",
+        "key.serializer" -> "org.apache.kafka.common.serialization.StringSerializer",
+        "partitioner.class" -> "kafka.producer.DefaultPartitioner",
+        "max.request.size" -> "10000", "acks" -> "all",
+        "bootstrap.servers" -> connectionString,
+        "retries" -> "3", "retry.backoff.ms" -> "500"
+    )
+
+    new KafkaProducer[Any, Any](props)
+}
                         </code></pre>
                     </section>
                 </section>
@@ -594,16 +601,6 @@ Consumer.create(new ConsumerConfig(props))
                         <p>Créer donc un stream sur notre topic *xebicon* pour ses *4* partitions.</p>
                     </section>
                     <section>
-                        <p>Petites aides en Scala ?</p>
-                    </section>
-                    <section>
-                        <pre><code class="hljs" data-trim>
-//permet de récuperer les streams de la première partition demandée
-def takeFirstPartitionOf(streams: collection.Map[String, List[KafkaStream[Array[Byte], Array[Byte]]]]): List[KafkaStream[Array[Byte], Array[Byte]]] =
-    streams.values.head
-                        </code></pre>
-                    </section>
-                    <section>
                         <h4>Solution</h4>
                     </section>
                     <section>
@@ -611,10 +608,7 @@ def takeFirstPartitionOf(streams: collection.Map[String, List[KafkaStream[Array[
 def topic = "xebicon"
 def numberOfPartitions = 4
 
-def takeFirstPartitionOf(streams: collection.Map[String, List[KafkaStream[Array[Byte], Array[Byte]]]]): List[KafkaStream[Array[Byte], Array[Byte]]] =
-    streams.values.head
-
-val streamsByTopic = consumer.createMessageStreams(Map(topic -> numberOfPartitions))
+val streamsByTopic = consumer.createMessageStreams(Map(topic -> numberOfPartitions))(topic)
 
 takeFirstPartitionOf(streamsByTopic)
                         </code></pre>
@@ -656,7 +650,7 @@ Future {
                         </code></pre>
                     </section>
                     <section>
-                        <p>À ce stage, vous pouvez lancer la classe <i>fr.xebia.xebicon.kafka.ConsumerHighLevel</i> et voir les messages envoyés par le producer.</p>
+                        <p>À ce stade, vous pouvez lancer la classe <i>fr.xebia.xebicon.kafka.ConsumerHighLevel</i> et voir les messages envoyés par le producer.</p>
                         <p>Vous pouvez donc fermer le consommateur en CLI.</p>
                     </section>
                 </section>
@@ -677,8 +671,9 @@ Future {
                         <p>Le <i>High Level consumer</i> convient à la majorité des cas. Si l'autocommit n'est pas un problème, c'est cette API qu'il faut utiliser.</p>
                     </section>
                     <section>
-                        <p>Si par contre, nous allons aller plus loin dans la gestion de stream pour le parcourir à l'envers. </p>
-                        <p>Il faut descendre d'un cran et utiliser le <i>Simple Consumer</i>.</p>
+                        <p>Pour cet atelier, nous allons aller plus loin dans la gestion de stream pour le parcourir à l'envers. </p>
+                        <p>On transforme ainsi un consommateur type FIFO en LIFO!</p>
+                        <p>Pour cela, il faut descendre d'un cran et utiliser le <i>Simple Consumer</i>.</p>
                         <p>Let's go!</p>
                     </section>
                 </section>
@@ -740,7 +735,7 @@ Future {
                     <section>
                         <pre><code class="hljs" data-trim>
 def connectToZookeeper(): ZkClient = {
-import kafka.utils.ZKStringSerializer
+    import kafka.utils.ZKStringSerializer
 
     new ZkClient("127.0.0.1:2181", 10000, 5000, ZKStringSerializer)
 }
@@ -783,7 +778,6 @@ import kafka.admin.AdminUtils
                     </section>
                     <section>
                         <p>À vous de chercher dans <i>kafka.admin.AdminUtils</i> la bonne méthode.</p>
-                        <p>La méthode <i>findPartitionLeader</i> retourne <i>Option[Broker]</i> car il se peut qu'il n'y ait pas de leader à cet instant.</p>
                     </section>
                     <section>
                         <p>Petites aides en Scala ?</p>
@@ -810,12 +804,14 @@ def findPartitionLeader(topicMetadata: TopicMetadata): Map[Int, Option[Broker]] 
     def asMap(topicMetadata: TopicMetadata): Map[Int, PartitionMetadata] = {
         topicMetadata.partitionsMetadata.groupBy(_.partitionId).toMap.mapValues(_.head)
     }
-
     val partitionsMetadata: Map[Int, PartitionMetadata] = asMap(topicMetadata)
 
     partitionsMetadata.mapValues(metadata => metadata.leader)
 }
                         </code></pre>
+                    </section>
+                    <section>
+                        <p>La méthode <i>findPartitionLeader</i> retourne <i>Option[Broker]</i> car il se peut qu'il n'y ait pas de leader à cet instant.</p>
                     </section>
                 </section>
 
@@ -930,9 +926,12 @@ yield {
                     <section>
                         <pre><code class="hljs" data-trim>
 def requestData(partition: Int, consumer: SimpleConsumer, offset: Long): FetchResponse = {
+    val messageMaxSize = 1000
+    val numberOfMessage = 1
+
     val request = new FetchRequestBuilder()
         .clientId("xebicon-printer")
-        .addFetch("xebicon", partition, offset, 1 * 1000)
+        .addFetch("xebicon", partition, offset, numberOfMessage * messageMaxSize)
         .build()
 
     consumer.fetch(request)
@@ -966,7 +965,7 @@ def requestData(partition: Int, consumer: SimpleConsumer, offset: Long): FetchRe
                     </section>
                     <section>
                         <pre><code class="hljs" data-trim>
-//permet de prendre le premier élément de l'itérateur, d'extraite le message et d'effectuer un traitement dessus
+//permet de prendre le premier élément de l'itérateur, d'extraire le message et d'effectuer un traitement dessus
 ... .iterator.take(1).foreach {
 
     case MessageAndOffset(message, readOffset) =>
@@ -1007,7 +1006,7 @@ def consume(partition: Int, fetchReply: FetchResponse) {
 
 
                 <section>
-                    <h2>SUMMARY</h2>
+                    <h2>Pour résumer</h2>
                     <section></section>
                     <section>
                         <p>Nous avons vu ensemble:<ul>
@@ -1018,7 +1017,7 @@ def consume(partition: Int, fetchReply: FetchResponse) {
                     </ul></p>
                     </section>
                     <section>
-                        <p>Pour résumer, Kafka est un journal de log distribué, hautement disponible et performant.</p>
+                        <p>Kafka est un journal de log distribué, hautement disponible et performant.</p>
                         <p>Cette solution peut vraiment être considérée comment une base de donneés.</p>
                         <p>Son stockage de données est sûr et la persistence est au coeur même du système.</p>
                     </section>

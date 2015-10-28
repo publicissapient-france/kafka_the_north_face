@@ -45,13 +45,8 @@ object ConsumerHighLevel {
     def topic = "xebicon"
     def numberOfPartitions = 4
 
-    def takeFirstPartitionOf(streams: collection.Map[String, List[KafkaStream[Array[Byte], Array[Byte]]]]): List[KafkaStream[Array[Byte], Array[Byte]]] =
-      streams.values.head
-
     //TODO STEP_2_2
-    val streamsByTopic = consumer.createMessageStreams(Map(topic -> numberOfPartitions))
-
-    takeFirstPartitionOf(streamsByTopic)
+    consumer.createMessageStreams(Map(topic -> numberOfPartitions))(topic)
   }
 
   def consumeStreamFrom(partitionStream: KafkaStream[Array[Byte], Array[Byte]]): Unit = {

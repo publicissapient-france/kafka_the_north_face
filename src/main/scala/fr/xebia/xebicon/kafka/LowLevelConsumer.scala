@@ -88,10 +88,12 @@ object LowLevelConsumer {
   }
 
   def requestData(partition: Int, consumer: SimpleConsumer, offset: Long): FetchResponse = {
+    val messageMaxSize = 1000
+    val numberOfMessage = 1
     //TODO STEP_3_6
     val request = new FetchRequestBuilder()
       .clientId("xebicon-printer")
-      .addFetch("xebicon", partition, offset, 1 * 1000)
+      .addFetch("xebicon", partition, offset, numberOfMessage * messageMaxSize)
       .build()
 
     consumer.fetch(request)

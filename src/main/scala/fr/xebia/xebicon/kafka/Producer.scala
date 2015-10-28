@@ -61,7 +61,6 @@ object Producer {
       "key.serializer" -> "org.apache.kafka.common.serialization.StringSerializer",
       "partitioner.class" -> "kafka.producer.DefaultPartitioner",
       "max.request.size" -> "10000",
-      "producer.type" -> "sync",
       "bootstrap.servers" -> connectionString,
       "acks" -> "all",
       "retries" -> "3",
