@@ -624,6 +624,9 @@ takeFirstPartitionOf(streamsByTopic)
                         <p>Nous allons donc ici créer un pool de thread par défaut et ainsi lire chaque partition dans un thread.</p>
                     </section>
                     <section>
+                        <p>Bouclez sur l'itérateur de message et appeler pour chaque message la méthode <i>display</i>.</p>
+                    </section>
+                    <section>
                         <p>Petites aides en Scala ?</p>
                     </section>
                     <section>
@@ -641,9 +644,20 @@ Future {
                     </section>
                     <section>
                         <pre><code class="hljs" data-trim>
-import concurrent.ExecutionContext.Implicits.global
-Future {
-    partitionStream.iterator().foreach(message => display(message))
+def consumeStreamFrom(partitionStream: KafkaStream[Array[Byte], Array[Byte]]): Unit = {
+
+    def display(message: MessageAndMetadata[Array[Byte], Array[Byte]]): Unit = {
+        def payload: String = new String(message.message(), "UTF-8")
+        def partition: Int = message.partition
+        def offset: Long = message.offset
+
+        println(s"partition: $partition, offset: $offset: $payload")
+    }
+
+    import concurrent.ExecutionContext.Implicits.global
+    Future {
+        partitionStream.iterator().foreach(message => display(message))
+    }
 }
                         </code></pre>
                     </section>
@@ -871,11 +885,17 @@ def connectTo(leader: Broker): SimpleConsumer = {
                     <section>
                         <pre><code class="hljs" data-trim>
 def findEarliestOffset(partition: Int, consumer: SimpleConsumer): Long = {
-    consumer.earliestOrLatestOffset(new TopicAndPartition("xebicon", partition), OffsetRequest.EarliestTime, Request.OrdinaryConsumerId)
+    def earliestOffsetRequest = OffsetRequest.EarliestTime
+    def consumerId = Request.OrdinaryConsumerId
+
+    consumer.earliestOrLatestOffset(new TopicAndPartition("xebicon", partition), earliestOffsetRequest, consumerId)
 }
 
 def findLatestOffset(partition: Int, consumer: SimpleConsumer): Long = {
-    consumer.earliestOrLatestOffset(new TopicAndPartition("xebicon", partition), OffsetRequest.LatestTime, Request.OrdinaryConsumerId)
+    def latestOffsetRequest = OffsetRequest.LatestTime
+    def consumerId = Request.OrdinaryConsumerId
+
+    consumer.earliestOrLatestOffset(new TopicAndPartition("xebicon", partition), latestOffsetRequest, consumerId)
 }
                         </code></pre>
                     </section>
@@ -924,12 +944,14 @@ yield {
                     <section>
                         <pre><code class="hljs" data-trim>
 def requestData(partition: Int, consumer: SimpleConsumer, offset: Long): FetchResponse = {
-    val messageMaxSize = 1000
-    val numberOfMessage = 1
+    def messageMaxSize = 1000
+    def numberOfMessage = 1
+    def clientId = "xebicon-printer"
+    def topic = "xebicon"
 
     val request = new FetchRequestBuilder()
-        .clientId("xebicon-printer")
-        .addFetch("xebicon", partition, offset, numberOfMessage * messageMaxSize)
+        .clientId(clientId)
+        .addFetch(topic, partition, offset, numberOfMessage * messageMaxSize)
         .build()
 
     consumer.fetch(request)

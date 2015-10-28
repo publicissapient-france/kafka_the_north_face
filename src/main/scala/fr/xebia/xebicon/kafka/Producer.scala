@@ -28,7 +28,7 @@ object Producer {
     import kafka.utils.ZKStringSerializer
 
     //TODO STEP_1_1
-    new ZkClient("127.0.0.1:2181", 10000, 5000, ZKStringSerializer)
+    ???
   }
 
   
@@ -36,39 +36,15 @@ object Producer {
     import kafka.utils.ZkUtils
     import kafka.cluster.Broker
 
-    def extractConnectionStringFrom(brokers: Seq[Broker]): Seq[String] = 
-      brokers.map(_.connectionString)
-    
-    def join(brokers: Seq[String]): String = 
-      brokers.mkString(",")
-    
     //TODO STEP_1_2
-    def brokersFromZk: Seq[Broker] = 
-      ZkUtils.getAllBrokersInCluster(zkClient)
-
-    join(
-      extractConnectionStringFrom(
-        brokersFromZk
-      )
-    )
+    ???
   }
 
   def createKafkaProducer(connectionString:String): KafkaProducer[Any, Any] = {
     import scala.collection.convert.wrapAsJava._
 
-    def props = Map(
-      "value.serializer" -> "org.apache.kafka.common.serialization.StringSerializer",
-      "key.serializer" -> "org.apache.kafka.common.serialization.StringSerializer",
-      "partitioner.class" -> "kafka.producer.DefaultPartitioner",
-      "max.request.size" -> "10000",
-      "bootstrap.servers" -> connectionString,
-      "acks" -> "all",
-      "retries" -> "3",
-      "retry.backoff.ms" -> "500"
-    )
-
     //TODO STEP_1_3
-    new KafkaProducer[Any, Any](props)
+    ???
   }
 
   def produceData(producer: KafkaProducer[Any, Any]): Unit = {
@@ -79,7 +55,6 @@ object Producer {
     import java.util.concurrent.Future
     import org.apache.kafka.clients.producer.RecordMetadata
 
-
     def blockOn[T](javaFuture: Future[T]): T =
       javaFuture.get(5,TimeUnit.SECONDS)
 
@@ -89,10 +64,8 @@ object Producer {
       def data = s"$instant: avg_load: $averageSystemLoad"
       
       //TODO STEP_1_4
-      val messageSending: Future[RecordMetadata] = producer.send(new ProducerRecord[Any, Any]("xebicon", data))
+      ???
       
-      blockOn(messageSending)
-
       Thread.sleep(1000)
     }
   }

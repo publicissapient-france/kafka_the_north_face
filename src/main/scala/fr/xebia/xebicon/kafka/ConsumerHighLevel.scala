@@ -28,16 +28,8 @@ object ConsumerHighLevel {
     def groupId = "xebicon_printer"
     def zookeeper = "127.0.0.1:2181"
     
-    val props = new Properties()
-
-    props.put("zookeeper.connect", zookeeper)
-    props.put("group.id", groupId)
-    props.put("zookeeper.session.timeout.ms", "400")
-    props.put("zookeeper.sync.time.ms", "200")
-    props.put("auto.commit.interval.ms", "1000")
-
     //TODO STEP_2_1
-    Consumer.create(new ConsumerConfig(props))
+    ???
   }
 
   def createStream(consumer: ConsumerConnector): List[KafkaStream[Array[Byte], Array[Byte]]] = {
@@ -46,7 +38,7 @@ object ConsumerHighLevel {
     def numberOfPartitions = 4
 
     //TODO STEP_2_2
-    consumer.createMessageStreams(Map(topic -> numberOfPartitions))(topic)
+    ???
   }
 
   def consumeStreamFrom(partitionStream: KafkaStream[Array[Byte], Array[Byte]]): Unit = {
@@ -59,10 +51,6 @@ object ConsumerHighLevel {
       println(s"partition: $partition, offset: $offset: $payload")
     }
 
-    import concurrent.ExecutionContext.Implicits.global
-    Future {
-      //TODO STEP_2_3
-      partitionStream.iterator().foreach(message => display(message))
-    }
+    //TODO STEP_2_3
   }
 }

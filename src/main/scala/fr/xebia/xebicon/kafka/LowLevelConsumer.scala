@@ -35,42 +35,42 @@ object LowLevelConsumer {
     import kafka.utils.ZKStringSerializer
 
     //TODO STEP_3_1
-    new ZkClient("127.0.0.1:2181", 10000, 5000, ZKStringSerializer)
+    ???
   }
 
   def fetchTopicMetadata(zkClient: ZkClient): TopicMetadata = {
     import kafka.admin.AdminUtils
 
     //TODO STEP_3_2
-    AdminUtils.fetchTopicMetadataFromZk("xebicon", zkClient)
+    ???
   }
 
   def findPartitionLeader(topicMetadata: TopicMetadata): Map[Int, Option[Broker]] = {
     import kafka.api.PartitionMetadata
 
-    def asMap(topicMetadata: TopicMetadata): Map[Int, PartitionMetadata] = {
-      topicMetadata.partitionsMetadata.groupBy(_.partitionId).toMap.mapValues(_.head)
-    }
-
     //TODO STEP_3_3
-    val partitionsMetadata: Map[Int, PartitionMetadata] = asMap(topicMetadata)
-
-    partitionsMetadata.mapValues(metadata => metadata.leader)
+    ???
   }
 
   def connectTo(leader: Broker): SimpleConsumer = {
     //TODO STEP_3_4
-    new SimpleConsumer(leader.host, leader.port, 10000, 64000, "xebicon-printer")
+    ???
   }
 
   def findEarliestOffset(partition: Int, consumer: SimpleConsumer): Long = {
     //TODO STEP_3_5
-    consumer.earliestOrLatestOffset(new TopicAndPartition("xebicon", partition), OffsetRequest.EarliestTime, Request.OrdinaryConsumerId)
+    def earliestOffsetRequest = OffsetRequest.EarliestTime
+    def consumerId = Request.OrdinaryConsumerId
+    
+    ???
   }
 
   def findLatestOffset(partition: Int, consumer: SimpleConsumer): Long = {
     //TODO STEP_3_5
-    consumer.earliestOrLatestOffset(new TopicAndPartition("xebicon", partition), OffsetRequest.LatestTime, Request.OrdinaryConsumerId)
+    def latestOffsetRequest = OffsetRequest.LatestTime
+    def consumerId = Request.OrdinaryConsumerId
+    
+    ???
   }
 
   def consumePartition(partition: Int, leader: Broker): IndexedSeq[Unit] = {
@@ -88,15 +88,13 @@ object LowLevelConsumer {
   }
 
   def requestData(partition: Int, consumer: SimpleConsumer, offset: Long): FetchResponse = {
-    val messageMaxSize = 1000
-    val numberOfMessage = 1
+    def messageMaxSize = 1000
+    def numberOfMessage = 1
+    def clientId = "xebicon-printer"
+    def topic = "xebicon"
+    
     //TODO STEP_3_6
-    val request = new FetchRequestBuilder()
-      .clientId("xebicon-printer")
-      .addFetch("xebicon", partition, offset, numberOfMessage * messageMaxSize)
-      .build()
-
-    consumer.fetch(request)
+    ???
   }
 
   def consume(partition: Int, fetchReply: FetchResponse) {
@@ -107,13 +105,7 @@ object LowLevelConsumer {
     }
 
     //TODO STEP_3_7
-    fetchReply.messageSet("xebicon", partition).iterator.take(1).foreach {
-      case MessageAndOffset(message, readOffset) =>
-        def offset: Long = readOffset
-        val payload: String = readBytes(message)
-
-        println(s"partition: $partition, offset: $offset. $payload")
-    }
+    ???
   }
 
 }
