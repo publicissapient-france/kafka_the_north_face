@@ -57,6 +57,8 @@ object ConsumerHighLevel {
       println(s"partition: $partition, offset: $offset: $payload")
     }
 
-    //TODO STEP_2_3
-  }
-}
+    import concurrent.ExecutionContext.Implicits.global
+    Future {
+      partitionStream.iterator().foreach(message => display(message))
+    }
+  }}
