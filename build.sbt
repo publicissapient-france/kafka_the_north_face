@@ -12,6 +12,6 @@ libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.6.
 
 libraryDependencies += "org.apache.spark" %% "spark-streaming" % sparkVersion
 
-libraryDependencies += "org.apache.spark" %% "spark-streaming-kafka" % sparkVersion
+libraryDependencies += "org.apache.spark" %% "spark-streaming-kafka-0-10" % sparkVersion
 
 retrieveManaged := true
