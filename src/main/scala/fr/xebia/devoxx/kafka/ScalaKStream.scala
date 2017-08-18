@@ -2,8 +2,8 @@ package fr.xebia.devoxx.kafka
 
 import java.util.Properties
 
-import org.apache.kafka.common.serialization.{StringDeserializer, StringSerializer}
-import org.apache.kafka.streams.kstream.{KeyValueMapper, KStream, KStreamBuilder}
+import org.apache.kafka.common.serialization.Serdes.StringSerde
+import org.apache.kafka.streams.kstream.{KStream, KStreamBuilder, KeyValueMapper}
 import org.apache.kafka.streams.{KafkaStreams, KeyValue, StreamsConfig}
 
 object ScalaKStream {
@@ -29,16 +29,10 @@ object ScalaKStream {
 
     // TODO 5_5 : Create a KafkaStreams object from this KStreamBuilder and a Properties object
     val props: Properties = new Properties
-    props.put(StreamsConfig.JOB_ID_CONFIG, "streams")
+    props.put("application.id", "streams")
     props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092,localhost:9093")
-    props.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181")
-    props.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
-    props.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
-    props.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
-    props.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
-
-    // setting offset reset to earliest so that we can re-run the demo code with the same pre-loaded data
-    props.put(StreamsConfig.AUTO_OFFSET_RESET_CONFIG, "latest")
+    props.put("default.key.serde", classOf[StringSerde])
+    props.put("default.value.serde", classOf[StringSerde])
 
     val kafkaStreams: KafkaStreams = new KafkaStreams(kStreamBuilder, props)
 

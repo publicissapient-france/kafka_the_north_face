@@ -1046,7 +1046,7 @@ private static void assignPartitions(KafkaConsumer&lt;String, String&gt; consume
                         <pre><code class="hljs" data-trim>
 private static void seek(KafkaConsumer&lt;String, String&gt; consumer) {
     // TODO 3_3
-    consumer.seekToBeginning();
+    consumer.seekToBeginning(consumer.assignment());
 }</code></pre>
                     </section>
                 </section>
@@ -1302,13 +1302,10 @@ config/connect-file-source.properties config/connect-file-sink.properties</code>
                     </section>
                     <section>
                         <pre><code class="hljs" data-trim>Properties props = new Properties();
-        props.put(StreamsConfig.JOB_ID_CONFIG, "streams-wordcount");
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams");
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092,localhost:9093");
-        props.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, "localhost:2181");
-        props.put(StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.StringSerde.class);
+        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.StringSerde.class);
 
         KafkaStreams kafkaStreams = new KafkaStreams(kStreamBuilder, props);</code></pre>
                     </section>
@@ -1427,10 +1424,21 @@ return new JavaStreamingContext(conf, Durations.seconds(5));
                     </section>
                     <section>
                         <pre><code class="hljs" data-trim>
-Map&lt;String, Integer> topics = new HashMap<>();
-topics.put("handsonkafka", 4);
+Collection&lt;String&gt; topics = Collections.singletonList("devoxx");
 
-return KafkaUtils.createStream(context, "localhost:2181", "streaming-client", topics);
+Map&lt;String, Object&gt; kafkaParams = new HashMap&lt;&gt;();
+kafkaParams.put("bootstrap.servers", "localhost:9092,localhost:9093");
+kafkaParams.put("key.deserializer", StringDeserializer.class);
+kafkaParams.put("value.deserializer", StringDeserializer.class);
+kafkaParams.put("group.id", "streaming-client");
+kafkaParams.put("auto.offset.reset", "latest");
+kafkaParams.put("enable.auto.commit", false);
+
+return KafkaUtils.createDirectStream(
+        context,
+        LocationStrategies.PreferConsistent(),
+        ConsumerStrategies.&lt;String, String&gt;Subscribe(topics, kafkaParams)
+);
                         </code></pre>
                     </section>
                 </section>
@@ -1461,7 +1469,7 @@ return KafkaUtils.createStream(context, "localhost:2181", "streaming-client", to
                     </section>
                     <section>
                         <pre><code class="hljs" data-trim>
-stream.map(v1 -> extractValueFromRecord(v1._2()))
+stream.map(v1 -> extractValueFromRecord(v1.value()))
     .foreachRDD(JavaConsumerStream::displayAvg);
 
 context.start();

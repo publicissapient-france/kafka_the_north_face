@@ -2,6 +2,7 @@ package fr.xebia.devoxx.kafka
 
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.TopicPartition
+import scala.collection.JavaConversions._
 
 object ScalaBatchConsumer {
 
@@ -36,7 +37,7 @@ object ScalaBatchConsumer {
   }
 
   private def seek(consumer: KafkaConsumer[String, String]) {
-    consumer.seekToBeginning()
+    consumer.seekToBeginning(consumer.assignment())
   }
 
   private def process(consumer: KafkaConsumer[String, String]) {

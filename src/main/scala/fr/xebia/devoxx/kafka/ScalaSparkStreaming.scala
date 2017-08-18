@@ -3,9 +3,11 @@ package fr.xebia.devoxx.kafka
 import java.text.SimpleDateFormat
 import java.util.Date
 
+import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.dstream.InputDStream
-import org.apache.spark.streaming.kafka._
+import org.apache.spark.streaming.kafka010.{ConsumerStrategies, KafkaUtils, LocationStrategies}
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.{SparkConf, SparkContext}
 
@@ -18,13 +20,12 @@ object ScalaSparkStreaming {
     val stream = createStream(streamingContext)
 
     // TODO Step 6_3
-    stream.map(_._2)
+    stream.map(_.value())
       .map(extractValueFromRecord)
       .foreachRDD(rdd => displayAvg(rdd))
 
     streamingContext.start()
     streamingContext.awaitTermination()
-
   }
 
   def createStreamContext(): StreamingContext = {
@@ -36,27 +37,41 @@ object ScalaSparkStreaming {
     new StreamingContext(new SparkContext(conf), Seconds(5))
   }
 
-  def createStream(context: StreamingContext): InputDStream[(String, String)] = {
+  def createStream(context: StreamingContext): InputDStream[ConsumerRecord[String, String]] = {
     // TODO Step 6_2
-    val zookeeper = "localhost:2181"
-    val clientName = "streaming-client"
-    val topics = Map("handsonkafka" -> 4)
+    val kafkaParams = Map[String, Object](
+      "bootstrap.servers" -> "localhost:9092,localhost:9093",
+      "key.deserializer" -> classOf[StringDeserializer],
+      "value.deserializer" -> classOf[StringDeserializer],
+      "group.id" -> "streaming-client",
+      "auto.offset.reset" -> "latest",
+      "enable.auto.commit" -> (false: java.lang.Boolean)
+    )
 
-    KafkaUtils.createStream(context, zookeeper, clientName, topics)
+    val topics = Array("devoxx")
+    KafkaUtils.createDirectStream[String, String](
+      context,
+      LocationStrategies.PreferConsistent,
+      ConsumerStrategies.Subscribe[String, String](topics, kafkaParams)
+    )
   }
 
   def extractValueFromRecord(line: String): Double = {
-    val pattern = ".{24}: avg_load: (.*)".r
+    val pattern = ".+: avg_load: (.*)".r
     line match {
-      case pattern(value) => Try(value.toDouble).getOrElse(0)
+      case pattern(value) =>
+        Try(value)
+          .map(_.replace(",", "."))
+          .map(_.toDouble)
+          .getOrElse(0)
       case _ => 0
     }
   }
 
-  def displayAvg(rdd: RDD[Double]) = {
-    val sum = rdd.fold(0)(_+_)
+  def displayAvg(rdd: RDD[Double]): Unit = {
+    val sum = rdd.fold(0)(_ + _)
     val count = rdd.count()
-    val avg = if(count == 0) 0 else sum/count
+    val avg = if (count == 0) 0 else sum / count
 
     val timeFormatter = new SimpleDateFormat("HH:mm:ss")
 

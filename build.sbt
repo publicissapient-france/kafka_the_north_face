@@ -1,11 +1,17 @@
 resolvers += "confluent" at "http://packages.confluent.io/maven/"
 
-libraryDependencies += "org.apache.kafka" % "kafka-clients" % "0.9.1.0-cp1"
+val kafkaVersion = "0.11.0.0"
 
-libraryDependencies += "org.apache.kafka" % "kafka-streams" % "0.9.1.0-cp1"
+val sparkVersion = "2.2.0"
 
-libraryDependencies += "org.apache.spark" %% "spark-streaming" % "1.6.1"
+libraryDependencies += "org.apache.kafka" % "kafka-clients" % kafkaVersion
 
-libraryDependencies += "org.apache.spark" %% "spark-streaming-kafka" % "1.6.1"
+libraryDependencies += "org.apache.kafka" % "kafka-streams" % kafkaVersion exclude("com.fasterxml.jackson.core", "jackson-databind")
+
+libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.6.0"
+
+libraryDependencies += "org.apache.spark" %% "spark-streaming" % sparkVersion
+
+libraryDependencies += "org.apache.spark" %% "spark-streaming-kafka" % sparkVersion
 
 retrieveManaged := true
