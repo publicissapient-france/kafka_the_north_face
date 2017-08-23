@@ -16,6 +16,7 @@ object ScalaBatchConsumer {
   }
 
   private def createKafkaConsumer(): KafkaConsumer[String, String] = {
+    // TODO 3_1
     import scala.collection.JavaConversions._
     val props = Map(
       "bootstrap.servers" -> "localhost:9092,localhost:9093",
@@ -28,6 +29,7 @@ object ScalaBatchConsumer {
   }
 
   private def assignPartitions(consumer: KafkaConsumer[String, String]) {
+    // TODO 3_2
     import scala.collection.JavaConversions._
     val partitionInfos = consumer.partitionsFor("winterfell")
     val topicPartitions = partitionInfos.map(partitionInfo => new TopicPartition("winterfell", partitionInfo.partition()))
@@ -36,10 +38,12 @@ object ScalaBatchConsumer {
   }
 
   private def seek(consumer: KafkaConsumer[String, String]) {
+    // TODO 3_3
     consumer.seekToBeginning(consumer.assignment())
   }
 
   private def process(consumer: KafkaConsumer[String, String]) {
+    // TODO 3_4
     import scala.collection.JavaConversions._
     var records = consumer.poll(1000)
     while (!records.isEmpty) {

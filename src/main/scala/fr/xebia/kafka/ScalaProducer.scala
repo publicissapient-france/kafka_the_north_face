@@ -14,6 +14,7 @@ object ScalaProducer {
 
     // écriture
     while (true) {
+      // TODO 1_2
       val message: String = produceData()
       val record: ProducerRecord[String, String] = new ProducerRecord[String, String]("winterfell", message)
       sendAsynchronously(producer, record)
@@ -22,12 +23,14 @@ object ScalaProducer {
   }
 
   private def createKafkaProducer(): KafkaProducer[String, String] = {
+    // TODO 1_1
     import scala.collection.JavaConversions._
     val props = Map(
       "bootstrap.servers" -> "localhost:9092,localhost:9093",
       "value.serializer" -> "org.apache.kafka.common.serialization.StringSerializer",
       "key.serializer" -> "org.apache.kafka.common.serialization.StringSerializer",
 
+      // TODO 1_5
       // optional properties
       // 0 : will not wait for any reply from the broker before assuming the message was sent successfully
       // 1 : will receive a success response from the broker the moment the leader replica received the message
@@ -75,6 +78,7 @@ object ScalaProducer {
   }
 
   private def fireAndForget(producer: KafkaProducer[String, String], record: ProducerRecord[String, String]) {
+    // TODO 1_2
     try {
       producer.send(record)
     } catch {
@@ -85,6 +89,7 @@ object ScalaProducer {
   }
 
   private def sendSynchronously(producer: KafkaProducer[String, String], record: ProducerRecord[String, String]) {
+    // TODO 1_3
     try {
       producer.send(record).get
     } catch {
@@ -95,11 +100,13 @@ object ScalaProducer {
   }
 
   private def sendAsynchronously(producer: KafkaProducer[String, String], record: ProducerRecord[String, String]) {
+    // TODO 1_4
     producer.send(record, new DemoProducerCallback())
   }
 
 }
 
+// TODO 1_4
 class DemoProducerCallback extends Callback {
   def onCompletion(recordMetadata: RecordMetadata, e: Exception) {
     if (e != null) {

@@ -40,11 +40,13 @@ object ScalaConsumer {
 
   private def createKafkaConsumer(): KafkaConsumer[String, String] = {
     import scala.collection.JavaConversions._
+    // TODO 2_1
     val props = Map(
       "bootstrap.servers" -> "localhost:9092,localhost:9093",
       "group.id" -> "whatever",
       "key.deserializer" -> "org.apache.kafka.common.serialization.StringDeserializer",
       "value.deserializer" -> "org.apache.kafka.common.serialization.StringDeserializer",
+      // TODO 2_3
       "enable.auto.commit" -> "true",
       "auto.commit.interval.ms" -> "5000",
       "session.timeout.ms" -> "30000",
@@ -59,6 +61,7 @@ object ScalaConsumer {
   }
 
   private def manualCommit(consumer: KafkaConsumer[String, String]) {
+    // TODO 2_4
     try {
       consumer.commitSync()
     } catch {
@@ -68,6 +71,7 @@ object ScalaConsumer {
   }
 
   private def manualAsynchronousCommit(consumer: KafkaConsumer[String, String]) {
+    // TODO 2_5
     import scala.collection.JavaConversions._
     consumer.commitAsync {
       new OffsetCommitCallback {
@@ -88,6 +92,7 @@ object ScalaConsumer {
 
 }
 
+// TODO 2_6
 class HandleRebalance extends ConsumerRebalanceListener {
   import scala.collection.JavaConversions._
   override def onPartitionsAssigned(partitions: util.Collection[TopicPartition]) {
