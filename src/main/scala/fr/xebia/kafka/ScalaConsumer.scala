@@ -1,4 +1,4 @@
-package fr.xebia.devoxx.kafka
+package fr.xebia.kafka
 
 import java.util
 import java.util.Collections
@@ -20,7 +20,7 @@ object ScalaConsumer {
     }
 
     // TODO 2_2
-    consumer.subscribe(Collections.singletonList("devoxx"), new HandleRebalance())
+    consumer.subscribe(Collections.singletonList("winterfell"), new HandleRebalance())
     try {
       while (true) {
         val records: ConsumerRecords[String, String] = consumer.poll(1000)

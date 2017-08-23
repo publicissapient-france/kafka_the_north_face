@@ -1,4 +1,4 @@
-package fr.xebia.devoxx.kafka
+package fr.xebia.kafka
 
 import java.lang.management.ManagementFactory
 import java.util.{Calendar, Date}
@@ -15,7 +15,7 @@ object ScalaProducer {
     // écriture
     while (true) {
       val message: String = produceData()
-      val record: ProducerRecord[String, String] = new ProducerRecord[String, String]("devoxx", message)
+      val record: ProducerRecord[String, String] = new ProducerRecord[String, String]("winterfell", message)
       sendAsynchronously(producer, record)
       Thread.sleep(1000)
     }

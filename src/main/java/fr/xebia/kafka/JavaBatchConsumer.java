@@ -1,4 +1,4 @@
-package fr.xebia.devoxx.kafka;
+package fr.xebia.kafka;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -38,9 +38,9 @@ public class JavaBatchConsumer {
 
     private static void assignPartitions(KafkaConsumer<String, String> consumer) {
         // TODO 3_2
-        List<PartitionInfo> partitionInfos = consumer.partitionsFor("devoxx");
+        List<PartitionInfo> partitionInfos = consumer.partitionsFor("winterfell");
         List<TopicPartition> topicPartitions =  partitionInfos.stream()
-                .map(partitionInfo -> new TopicPartition("devoxx", partitionInfo.partition()))
+                .map(partitionInfo -> new TopicPartition("winterfell", partitionInfo.partition()))
                 .collect(Collectors.toList());
 
         System.out.println(topicPartitions);

@@ -1,4 +1,4 @@
-package fr.xebia.devoxx.kafka;
+package fr.xebia.kafka;
 
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -22,7 +22,7 @@ public class JavaProducer {
         while (true) {
             // TODO 1_2
             String message = produceData();
-            ProducerRecord<String, String> record = new ProducerRecord<>("devoxx", message);
+            ProducerRecord<String, String> record = new ProducerRecord<>("winterfell", message);
             sendAsynchronously(producer, record);
             Thread.sleep(1000);
         }

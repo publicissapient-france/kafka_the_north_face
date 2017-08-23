@@ -1,4 +1,4 @@
-package fr.xebia.devoxx.kafka;
+package fr.xebia.kafka;
 
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
@@ -31,7 +31,7 @@ public class JavaConsumer {
         });
 
         // TODO 2_2
-        consumer.subscribe(Collections.singletonList("devoxx"), new HandleRebalance());
+        consumer.subscribe(Collections.singletonList("winterfell"), new HandleRebalance());
         try {
             while (true) {
                 ConsumerRecords<String, String> records = consumer.poll(1000);

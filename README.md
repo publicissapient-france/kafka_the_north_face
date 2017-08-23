@@ -1,6 +1,6 @@
-#Kafka par la face nord
+#The North Remember
 
-Ce hands'on est un atelier de découverte de Kafka 0.8.2.X en Java et Scala.
+Ce hands'on est un atelier de découverte de Kafka 0.11.0.0 en Java et Scala.
 
 Il nécessite Java8.
 

@@ -1,4 +1,4 @@
-package fr.xebia.devoxx.kafka;
+package fr.xebia.kafka;
 
 import org.apache.kafka.common.serialization.*;
 import org.apache.kafka.streams.KafkaStreams;
@@ -15,7 +15,7 @@ public class WordCountJob {
 
     public static void main(String[] args) throws Exception {
         Properties props = new Properties();
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "devoxx-wordcount");
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "winterfell-wordcount");
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.StringSerde.class);
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.StringSerde.class);
@@ -27,7 +27,7 @@ public class WordCountJob {
         final Serializer<Long> longSerializer = new LongSerializer();
         final Deserializer<Long> longDeserializer = new LongDeserializer();
 
-        KStream<String, String> source = builder.stream("devoxx-wordcount");
+        KStream<String, String> source = builder.stream("winterfell-wordcount");
 
         KTable<String, Long> wordCounts = source
                 // Split each text line, by whitespace, into words.  The text lines are the message
@@ -45,7 +45,7 @@ public class WordCountJob {
                 //
                 .groupByKey().count();
 
-        wordCounts.to("devoxx-wordcount-out");
+        wordCounts.to("winterfell-wordcount-out");
 
         KafkaStreams streams = new KafkaStreams(builder, props);
         streams.start();

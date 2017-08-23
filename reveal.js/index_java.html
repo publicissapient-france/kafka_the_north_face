@@ -50,7 +50,7 @@
                     <br />
                     <br />
 					<h1>Hands on Kafka</h1>
-                    <h3>Devoxx 2016</h3>
+                    <h3>XKE Septembre 2017</h3>
 				</section>
 
 				<section>
@@ -195,10 +195,10 @@ get /brokers/ids/2
 						<p>Nous allons créer un topic pour cet atelier. Il sera répliqué deux fois avec 4 partitions.</p>
 					</section>
 					<section>
-						<h3>Création du topic 'devoxx'</h3>
+						<h3>Création du topic 'winterfell'</h3>
 						<pre><code class="hljs" data-trim>
-./bin/kafka-topics.sh --create --topic devoxx \
---partition 4 --replication-factor 2 --zookeeper 127.0.0.1:2181
+./bin/kafka-topics.sh --create --topic winterfell \
+--partitions 4 --replication-factor 2 --zookeeper 127.0.0.1:2181
 						</code></pre>
 					</section>
 					<section>
@@ -208,13 +208,13 @@ get /brokers/ids/2
 					<section>
 						<h3>Vérification</h3>
 						<pre><code class="hljs" data-trim>
-./bin/kafka-topics.sh --describe  --topic devoxx --zookeeper 127.0.0.1:2181
+./bin/kafka-topics.sh --describe  --topic winterfell --zookeeper 127.0.0.1:2181
 
-Topic:devoxx  PartitionCount:4  ReplicationFactor:2 Configs:
-  Topic: devoxx	Partition: 0  Leader: 1	Replicas: 1,2  Isr: 1,2
-  Topic: devoxx	Partition: 1  Leader: 2	Replicas: 2,1  Isr: 2,1
-  Topic: devoxx	Partition: 2  Leader: 1	Replicas: 1,2  Isr: 1,2
-  Topic: devoxx	Partition: 3  Leader: 2	Replicas: 2,1  Isr: 2,1
+Topic:winterfell  PartitionCount:4  ReplicationFactor:2 Configs:
+  Topic: winterfell	Partition: 0  Leader: 1	Replicas: 1,2  Isr: 1,2
+  Topic: winterfell	Partition: 1  Leader: 2	Replicas: 2,1  Isr: 2,1
+  Topic: winterfell	Partition: 2  Leader: 1	Replicas: 1,2  Isr: 1,2
+  Topic: winterfell	Partition: 3  Leader: 2	Replicas: 2,1  Isr: 2,1
 						</code></pre>
 						<p>Dans ce cas, les partitions 0 et 2 sont gérées par le broker 1, 1 et 3 par le broker 2.</p>
 						<p>Toutes les partitions ont des replicas "In sync" dans les deux brokers.</p>
@@ -222,14 +222,14 @@ Topic:devoxx  PartitionCount:4  ReplicationFactor:2 Configs:
 					<section>
 						<h3>Lancement d'un consommateur</h3>
 						<pre><code class="hljs" data-trim>
-./bin/kafka-console-consumer.sh --topic devoxx --zookeeper 127.0.0.1:2181
+./bin/kafka-console-consumer.sh --topic winterfell --zookeeper 127.0.0.1:2181
 						</code></pre>
 						<p>Rien ne se passe pour l'instant car il n'y a pas de production de données.</p>
 					</section>
                     <section>
                         <h3>Lancement d'un producteur</h3>
 						<pre><code class="hljs" data-trim>
-./bin/kafka-console-producer.sh --topic devoxx --broker-list 127.0.0.1:9092,127.0.0.1:9093
+./bin/kafka-console-producer.sh --topic winterfell --broker-list 127.0.0.1:9092,127.0.0.1:9093
                         </code></pre>
                         <p>Vous remarquerez cette fois que nous avons donné en paramètre la liste des brokers et pas de zookeeper.</p>
                     </section>
@@ -245,41 +245,41 @@ ls -l /tmp/kafka-logs-1 /tmp/kafka-logs-2
 total 16
 .
 ..
-devoxx-0
-devoxx-1
-devoxx-2
-devoxx-3
+winterfell-0
+winterfell-1
+winterfell-2
+winterfell-3
 
 /tmp/kafka-logs-2:
 total 16
 .
 ..
-devoxx-0
-devoxx-1
-devoxx-2
-devoxx-3
+winterfell-0
+winterfell-1
+winterfell-2
+winterfell-3
                         </code></pre>
                     </section>
                     <section>
                         <h3>Stockage des données</h3>
                         <pre><code class="hljs" data-trim>
-ls -l /tmp/kafka-logs-*/devoxx-*/*
+ls -l /tmp/kafka-logs-*/winterfell-*/*
 
-/tmp/kafka-logs-1/devoxx-1/00000000000000000000.index
-/tmp/kafka-logs-1/devoxx-1/00000000000000000000.log
-/tmp/kafka-logs-1/devoxx-3/00000000000000000000.index
-/tmp/kafka-logs-1/devoxx-3/00000000000000000000.log
-/tmp/kafka-logs-2/devoxx-0/00000000000000000000.index
-/tmp/kafka-logs-2/devoxx-0/00000000000000000000.log
-/tmp/kafka-logs-2/devoxx-2/00000000000000000000.index
-/tmp/kafka-logs-2/devoxx-2/00000000000000000000.log
+/tmp/kafka-logs-1/winterfell-1/00000000000000000000.index
+/tmp/kafka-logs-1/winterfell-1/00000000000000000000.log
+/tmp/kafka-logs-1/winterfell-3/00000000000000000000.index
+/tmp/kafka-logs-1/winterfell-3/00000000000000000000.log
+/tmp/kafka-logs-2/winterfell-0/00000000000000000000.index
+/tmp/kafka-logs-2/winterfell-0/00000000000000000000.log
+/tmp/kafka-logs-2/winterfell-2/00000000000000000000.index
+/tmp/kafka-logs-2/winterfell-2/00000000000000000000.log
                         </code></pre>
                         <p>Dans chaque partition, un fichier a été créé pour indexer les données et les stocker.</p>
                     </section>
                     <section>
                         <pre><code class="hljs" data-trim>
-cat /tmp/kafka-logs-*/devoxx-*/*.log
-p_N����Bonjour devoxxp_N����Bonjour devoxxp_N����Bonjour devoxx�������phae�[^<����ahize%
+cat /tmp/kafka-logs-*/winterfell-*/*.log
+p_N����Winter is Comingp_N����Winter is Comingp_N����Winter is Coming�������phae�[^<����ahize%
                         </code></pre>
                         <p>Enfin, à l'intérieur des fichiers .log (segments) se trouvent les messages.</p>
                     </section>
@@ -290,7 +290,7 @@ cat /tmp/kafka-logs-*/devoxx-*/*.log
                     <h3>Codons un producteur</h3>
                     <section data-background="http://i.giphy.com/ZPFQVis9WAAcE.gif"></section>
                     <section>
-                        <p>Nous allons maintenant créer un producteur de données avec du code et l'API 0.9.1.X de Kafka.</p>
+                        <p>Nous allons maintenant créer un producteur de données avec du code et l'API 0.11.0.0 de Kafka.</p>
                     </section>
                     <section>
                         <p>Écrire dans Kafka consiste à :
@@ -302,7 +302,7 @@ cat /tmp/kafka-logs-*/devoxx-*/*.log
                         </p>
                     </section>
                     <section>
-                        <p>Pour se faire, vous allez devoir suivre les 4 TODOs de la classes <i>fr.xebia.devoxx.kafka.JavaProducer</i> en suivant les étapes décrites si dessous.</p>
+                        <p>Pour se faire, vous allez devoir suivre les 4 TODOs de la classes <i>fr.xebia.kafka.JavaProducer</i> en suivant les étapes décrites si dessous.</p>
                         <p>Cette classe est une classe exécutable que vous pouvez lancer depuis Eclipse ou IntelliJ.</p>
                     </section>
                 </section>
@@ -359,7 +359,7 @@ return new KafkaProducer&lt;&gt;(props);
                     <h3>Écriture dans le topic</h3>
                     <section></section>
                     <section>
-                        <p>Explorez l'API de <i>KafkaProducer</i> et <i>ProducerRecord</i> et envoyez un message (<i>ProducerRecord&lt;K, V&gt;</i>) sur le topic <i>devoxx</i>.</p>
+                        <p>Explorez l'API de <i>KafkaProducer</i> et <i>ProducerRecord</i> et envoyez un message (<i>ProducerRecord&lt;K, V&gt;</i>) sur le topic <i>winterfell</i>.</p>
                     </section>
                     <section>
                         <p>Vous trouverez une méthode <i>produceData</i> qui produit un message avec le timestamp + la charge moyenne de votre machine.</p>
@@ -387,7 +387,7 @@ public static void main(String[] args) throws ExecutionException, InterruptedExc
     while (true) {
         // TODO 1_2
         String message = produceData();
-        ProducerRecord&lt;String, String&gt; record = new ProducerRecord<>("devoxx", message);
+        ProducerRecord&lt;String, String&gt; record = new ProducerRecord<>("winterfell", message);
         fireAndForget(producer, record);
         Thread.sleep(1000);
     }
@@ -543,10 +543,10 @@ private static void sendAsynchronously(KafkaProducer&lt;String, String&gt; produ
                     <h3>Codons un consommateur</h3>
                     <section data-background="http://i.giphy.com/SFRhYgSElTfvG.gif"></section>
                     <section>
-                        <p>En suivant la même démarche, nous allons coder un consommateur Kafka à l'aide de la nouvelle API introduite avec la version 0.9.</p>
+                        <p>En suivant la même démarche, nous allons coder un consommateur Kafka à l'aide de l'API Kafka Connect.</p>
                     </section>
                     <section>
-                        <p>Cette fois, nous allons travailler sur la classe <i>fr.xebia.devoxx.kafka.JavaConsumer</i>.</p>
+                        <p>Cette fois, nous allons travailler sur la classe <i>fr.xebia.kafka.JavaConsumer</i>.</p>
                     </section>
                     <section>
                         <p>Lire avec ce consommateur depuis Kafka consiste à :
@@ -559,8 +559,8 @@ private static void sendAsynchronously(KafkaProducer&lt;String, String&gt; produ
                         </p>
                     </section>
                     <section>
-                        <p>Pour se faire, vous allez devoir suivre les 6 TODOs de la classes <i>fr.xebia.devoxx.kafka.JavaConsumer</i> en suivant les étapes décrites si dessous.</p>
-                        <p>Cette classe est une classe exécutable que vous pouvez lancer depuis Eclipse ou IntelliJ.</p>
+                        <p>Pour se faire, vous allez devoir suivre les 6 TODOs de la classes <i>fr.xebia.kafka.JavaConsumer</i> en suivant les étapes décrites si dessous.</p>
+                        <p>Cette classe est une classe exécutable que vous pouvez lancer depuis IntelliJ.</p>
                     </section>
                 </section>
 
@@ -625,11 +625,11 @@ private static KafkaConsumer&lt;String, String&gt; createKafkaConsumer() {
                     <section></section>
                     <section>
                         <p>Juste avant la boucle infinie de la méthode <i>main</i></p>
-                        <p>Abonner le consumer au topic devoxx à l'aide de la méthode <i>subcribe</i>.</p>
+                        <p>Abonner le consumer au topic winterfell à l'aide de la méthode <i>subcribe</i>.</p>
                     </section>
                     <section>
                         <p>Dans la boucle infinie : </p>
-                        <p>Récupérer les messages du topic devoxx à l'aide la méthode <i>poll</i>.</p>
+                        <p>Récupérer les messages du topic winterfell à l'aide la méthode <i>poll</i>.</p>
                     </section>
                     <section>
                         <p>poll() retourne un Iterable de <i>ConsumerRecord</i>.</p>
@@ -653,7 +653,7 @@ public static void main(String[] args) {
     KafkaConsumer&lt;String, String&gt; consumer = createKafkaConsumer();
 
     // TODO 2_2
-    consumer.subscribe(Collections.singletonList("devoxx"));
+    consumer.subscribe(Collections.singletonList("winterfell"));
     try {
         while (true) {
             ConsumerRecords&lt;String, String&gt; consumerRecords = consumer.poll(100);
@@ -731,7 +731,7 @@ private static KafkaConsumer&lt;String, String&gt; createKafkaConsumer() {
 }</code></pre>
                     </section>
                     <section>
-                        <p>À ce stage, vous pouvez lancer la classe <i>fr.xebia.devoxx.kafka.JavaConsumer</i> et voir les messages envoyés par le producer.</p>
+                        <p>À ce stage, vous pouvez lancer la classe <i>fr.xebia.kafka.JavaConsumer</i> et voir les messages envoyés par le producer.</p>
                         <p>Vous pouvez donc fermer le consommateur en CLI.</p>
                     </section>
                     <section>
@@ -939,10 +939,10 @@ Runtime.getRuntime().addShutdownHook(new Thread() {
                     <h3>Batch consumer</h3>
                     <section data-background="img/K48x3A2pHglFK.gif"></section>
                     <section>
-                        <p>Nous allons coder un consommateur Kafka en mode batch à l'aide de la nouvelle API introduite avec la version 0.9.</p>
+                        <p>Nous allons coder un consommateur Kafka en mode batch à l'aide de l'API Kafka Connect.</p>
                     </section>
                     <section>
-                        <p>Cette fois, nous allons travailler sur la classe <i>fr.xebia.devoxx.kafka.JavaBatchConsumer</i>.</p>
+                        <p>Cette fois, nous allons travailler sur la classe <i>fr.xebia.kafka.JavaBatchConsumer</i>.</p>
                     </section>
                     <section>
                         <p>Créer un job avec ce consommateur depuis Kafka consiste à :
@@ -955,8 +955,8 @@ Runtime.getRuntime().addShutdownHook(new Thread() {
                         </p>
                     </section>
                     <section>
-                        <p>Pour se faire, vous allez devoir suivre les 4 TODOs de la classes <i>fr.xebia.devoxx.kafka.JavaBatchConsumer</i> en suivant les étapes décrites si dessous.</p>
-                        <p>Cette classe est une classe exécutable que vous pouvez lancer depuis Eclipse ou IntelliJ.</p>
+                        <p>Pour se faire, vous allez devoir suivre les 4 TODOs de la classes <i>fr.xebia.kafka.JavaBatchConsumer</i> en suivant les étapes décrites si dessous.</p>
+                        <p>Cette classe est une classe exécutable que vous pouvez lancer depuis IntelliJ.</p>
                     </section>
                 </section>
 
@@ -1003,7 +1003,7 @@ private static KafkaConsumer&lt;String, String&gt; createKafkaConsumer() {
                         <p>Nous allons assigner les partitions consommées par ce job manuellement</p>
                     </section>
                     <section>
-                        <p>Dans la methode <i>assignPartitions</i> : récupérer la liste des partitions du topic devoxx à l'aide de la méthode <i>partitionsFor</i> du consumer</p>
+                        <p>Dans la methode <i>assignPartitions</i> : récupérer la liste des partitions du topic winterfell à l'aide de la méthode <i>partitionsFor</i> du consumer</p>
                         <p>Transformer cette liste de <i>PartitionInfo</i> en une liste de <i>TopicPartition</i></p>
                         <p>assigne la liste de <i>TopicPartition</i> au consumer à l'aide de la méthode <i>assign</i> </p>
                     </section>
@@ -1017,9 +1017,9 @@ private static KafkaConsumer&lt;String, String&gt; createKafkaConsumer() {
                         <pre><code class="hljs" data-trim>
 private static void assignPartitions(KafkaConsumer&lt;String, String&gt; consumer) {
     // TODO 3_2
-    List&lt;PartitionInfo&gt; partitionInfos = consumer.partitionsFor("devoxx");
+    List&lt;PartitionInfo&gt; partitionInfos = consumer.partitionsFor("winterfell");
     List&lt;TopicPartition&gt; topicPartitions =  partitionInfos.stream()
-    .map(partitionInfo -> new TopicPartition("devoxx", partitionInfo.partition()))
+    .map(partitionInfo -> new TopicPartition("winterfell", partitionInfo.partition()))
     .collect(Collectors.toList());
 
     System.out.println(topicPartitions);
@@ -1114,15 +1114,15 @@ private static void process(KafkaConsumer&lt;String, String&gt; consumer) {
                         <p>Nous allons envoyer des donneés vers Kafka depuis un système de données qui sera ici un simple fichier texte.</p>
                     </section>
                     <section>
-                        <p>Commencer par créer un nouveau topic devoxx-connect.</p>
+                        <p>Commencer par créer un nouveau topic winterfell-connect.</p>
                     </section>
                     <section>
                         <h4>Solution</h4>
                     </section>
                     <section>
                         <pre><code class="hljs" data-trim>
-./bin/kafka-topics.sh --create --topic devoxx-connect \
---partition 4 --replication-factor 2 --zookeeper 127.0.0.1:2181</code></pre>
+./bin/kafka-topics.sh --create --topic winterfell-connect \
+--partitions 4 --replication-factor 2 --zookeeper 127.0.0.1:2181</code></pre>
                     </section>
                     <section>
                         <p>A la racine de votre installation de Kafka : créer un fichier best-db-ever.txt</p>
@@ -1134,8 +1134,8 @@ private static void process(KafkaConsumer&lt;String, String&gt; consumer) {
                     </section>
                     <section>
                         <p>Nous allons lancer le service Kafka Connect en mode standalone avec deux connecteurs</p>
-                        <p>Un premier qui va "écouter" les messages envoyés à notre première base de données (les lignes de notre fichier texte) et envoyer ces messages dans le topic devoxx-connect</p>
-                        <p>Un deuxième qui va consommer les messages du topic devoxx-connect et les envoyer à notre deuxième base de données (écrire un ligne par message dans le fichier texte)</p>
+                        <p>Un premier qui va "écouter" les messages envoyés à notre première base de données (les lignes de notre fichier texte) et envoyer ces messages dans le topic winterfell-connect</p>
+                        <p>Un deuxième qui va consommer les messages du topic winterfell-connect et les envoyer à notre deuxième base de données (écrire un ligne par message dans le fichier texte)</p>
                     </section>
                     <section>
                         <p>La configuration du service Kafka Connect sera le fichier config/connect-standalone.properties</p>
@@ -1147,7 +1147,7 @@ private static void process(KafkaConsumer&lt;String, String&gt; consumer) {
                         <p>Nous utiliserons le fichier config/connect-file-sink.properties pour le second connecteur</p>
                     </section>
                     <section>
-                        <p>Modifier les properties de ces fichiers pour lire les données de best-db-ever.txt et les envoyer vers second-best-db-ever.txt en passant par le topic Kafka devoxx-connect</p>
+                        <p>Modifier les properties de ces fichiers pour lire les données de best-db-ever.txt et les envoyer vers second-best-db-ever.txt en passant par le topic Kafka winterfell-connect</p>
                     </section>
                     <section>
                         <h4>Solution</h4>
@@ -1158,7 +1158,7 @@ private static void process(KafkaConsumer&lt;String, String&gt; consumer) {
 connector.class=org.apache.kafka.connect.file.FileStreamSourceConnector
 tasks.max=1
 file=best-db-ever.txt
-topic=devoxx-connect</code></pre></p>
+topic=winterfell-connect</code></pre></p>
                     </section>
                     <section>
                         <p>connect-file-sink.properties</p>
@@ -1166,7 +1166,7 @@ topic=devoxx-connect</code></pre></p>
 connector.class=org.apache.kafka.connect.file.FileStreamSinkConnector
 tasks.max=1
 file=second-best-db-ever.txt
-topics=devoxx-connect</code></pre></p>
+topics=winterfell-connect</code></pre></p>
                     </section>
                     <section>
                         <p>Lancer le service Kafka Connect</p>
@@ -1193,7 +1193,7 @@ config/connect-file-source.properties config/connect-file-sink.properties</code>
                     <section data-background="img/YotKRfokBujGE.gif"></section>
                     <section></section>
                     <section>
-                        <p>Nouveauté de la version 0.10.0.0 de Kafka</p>
+                        <p>Depuis de la version 0.10.0.0 de Kafka</p>
                         <p>Kafka Streams est une librairie permettant d'analyser et de transformer les flux de données persistées dans Kafka</p>
                     </section>
                     <section>
@@ -1202,7 +1202,7 @@ config/connect-file-source.properties config/connect-file-sink.properties</code>
                     </section>
                     <section>
                         <p>Commençons par créer un stream processing très simple qui va légerement modifier nos messages provenant de notre base de données crée dans l'exercice précedent</p>
-                        <p>Cette fois, nous allons travailler sur la classe <i>fr.xebia.devoxx.kafka.JavaKStream</i>.</p>
+                        <p>Cette fois, nous allons travailler sur la classe <i>fr.xebia.kafka.JavaKStream</i>.</p>
                     </section>
                 </section>
 
@@ -1226,7 +1226,7 @@ config/connect-file-source.properties config/connect-file-sink.properties</code>
                     <h2>STEP_5_2</h2>
                     <h3>Créer un KStream</h3>
                     <section></section>
-                    <section><p>Créer un KStream, flux des données du topic Kafka "devoxx-connect" à l'aide de la méthode <i>stream</i> du <i>kStreamBuilder</i></section>
+                    <section><p>Créer un KStream, flux des données du topic Kafka "winterfell-connect" à l'aide de la méthode <i>stream</i> du <i>kStreamBuilder</i></section>
                     <section>
                         <h4>Implémentez la section 5_2</h4>
                     </section>
@@ -1234,7 +1234,7 @@ config/connect-file-source.properties config/connect-file-sink.properties</code>
                         <h4>Solution</h4>
                     </section>
                     <section>
-                        <pre><code class="hljs" data-trim>KStream&lt;String, String&gt; source = kStreamBuilder.stream("devoxx-connect");</code></pre>
+                        <pre><code class="hljs" data-trim>KStream&lt;String, String&gt; source = kStreamBuilder.stream("winterfell-connect");</code></pre>
                     </section>
                 </section>
 
@@ -1262,7 +1262,7 @@ config/connect-file-source.properties config/connect-file-sink.properties</code>
                     <h3>Envoyer les messages transformés dans un nouveau topic</h3>
                     <section></section>
                     <section>
-                        <p>Envoyer les messages du stream précédent dans le topic "devoxx-streams-out" en appelant la méthode <i>to</i> sur le kStream</p>
+                        <p>Envoyer les messages du stream précédent dans le topic "winterfell-streams-out" en appelant la méthode <i>to</i> sur le kStream</p>
                     </section>
                     <section>
                         <h4>Implémentez la section 5_4</h4>
@@ -1271,7 +1271,7 @@ config/connect-file-source.properties config/connect-file-sink.properties</code>
                         <h4>Solution</h4>
                     </section>
                     <section>
-                        <pre><code class="hljs" data-trim>sink.to("devoxx-streams-out");</code></pre>
+                        <pre><code class="hljs" data-trim>sink.to("winterfell-streams-out");</code></pre>
                     </section>
                 </section>
 
@@ -1285,13 +1285,10 @@ config/connect-file-source.properties config/connect-file-sink.properties</code>
                     <section>
                         <p>Dans l'objet Properties, vous devrez configurer les properties possédant les clés suivantes :</p>
                         <ul>
-                            <li>StreamsConfig.JOB_ID_CONFIG</li>
+                            <li>StreamsConfig.APPLICATION_ID_CONFIG</li>
                             <li>StreamsConfig.BOOTSTRAP_SERVERS_CONFIG</li>
-                            <li>StreamsConfig.ZOOKEEPER_CONNECT_CONFIG</li>
-                            <li>StreamsConfig.KEY_SERIALIZER_CLASS_CONFIG</li>
-                            <li>StreamsConfig.VALUE_SERIALIZER_CLASS_CONFIG</li>
-                            <li>StreamsConfig.KEY_DESERIALIZER_CLASS_CONFIG</li>
-                            <li>StreamsConfig.VALUE_DESERIALIZER_CLASS_CONFIG</li>
+                            <li>StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG</li>
+                            <li>StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG</li>
                         </ul>
                     </section>
                     <section>
@@ -1328,7 +1325,7 @@ config/connect-file-source.properties config/connect-file-sink.properties</code>
                         <pre><code class="hljs" data-trim>kafkaStreams.start();</code></pre>
                     </section>
                     <section>
-                        <p>modifier la configuration du fichier config/connect-file-sink.properties pour écouter les messages du topic devoxx-streams-out</p>
+                        <p>modifier la configuration du fichier config/connect-file-sink.properties pour écouter les messages du topic winterfell-streams-out</p>
                         <p>relancer le service KafkaConnect</p>
                     </section>
                     <section>
@@ -1424,7 +1421,7 @@ return new JavaStreamingContext(conf, Durations.seconds(5));
                     </section>
                     <section>
                         <pre><code class="hljs" data-trim>
-Collection&lt;String&gt; topics = Collections.singletonList("devoxx");
+Collection&lt;String&gt; topics = Collections.singletonList("winterfell");
 
 Map&lt;String, Object&gt; kafkaParams = new HashMap&lt;&gt;();
 kafkaParams.put("bootstrap.servers", "localhost:9092,localhost:9093");

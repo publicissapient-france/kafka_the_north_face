@@ -1,4 +1,4 @@
-package fr.xebia.devoxx.kafka
+package fr.xebia.kafka
 
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -48,7 +48,7 @@ object ScalaSparkStreaming {
       "enable.auto.commit" -> (false: java.lang.Boolean)
     )
 
-    val topics = Array("devoxx")
+    val topics = Array("winterfell")
     KafkaUtils.createDirectStream[String, String](
       context,
       LocationStrategies.PreferConsistent,

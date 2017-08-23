@@ -1,4 +1,4 @@
-package fr.xebia.devoxx.kafka;
+package fr.xebia.kafka;
 
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -42,7 +42,7 @@ public class JavaSparkStreaming {
 
     public static JavaInputDStream<ConsumerRecord<String, String>> createStream(JavaStreamingContext context) {
         // TODO Step 6_2
-        Collection<String> topics = Collections.singletonList("devoxx");
+        Collection<String> topics = Collections.singletonList("winterfell");
 
         Map<String, Object> kafkaParams = new HashMap<>();
         kafkaParams.put("bootstrap.servers", "localhost:9092,localhost:9093");

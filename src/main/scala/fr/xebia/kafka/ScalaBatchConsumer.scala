@@ -1,8 +1,7 @@
-package fr.xebia.devoxx.kafka
+package fr.xebia.kafka
 
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.TopicPartition
-import scala.collection.JavaConversions._
 
 object ScalaBatchConsumer {
 
@@ -30,8 +29,8 @@ object ScalaBatchConsumer {
 
   private def assignPartitions(consumer: KafkaConsumer[String, String]) {
     import scala.collection.JavaConversions._
-    val partitionInfos = consumer.partitionsFor("devoxx")
-    val topicPartitions = partitionInfos.map(partitionInfo => new TopicPartition("devoxx", partitionInfo.partition()))
+    val partitionInfos = consumer.partitionsFor("winterfell")
+    val topicPartitions = partitionInfos.map(partitionInfo => new TopicPartition("winterfell", partitionInfo.partition()))
     System.out.println(topicPartitions)
     consumer.assign(topicPartitions)
   }
