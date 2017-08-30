@@ -1348,8 +1348,8 @@ mkdir -p /tmp/ssl/csr
 mkdir -p /tmp/ssl/certs
 mkdir -p /tmp/ssl/root_auth
 
-openssl genrsa -out -p /tmp/ssl/root_auth/rootCA.key 2048
-openssl req -x509 -new -nodes -key -p /tmp/ssl/root_auth/rootCA.key -sha256 -days 1024 -out /tmp/ssl/root_auth/rootCA.pem -subj "/CN=Xebia/L=Paris/ST=Paris/C=FR"</code></pre>
+openssl genrsa -out /tmp/ssl/root_auth/rootCA.key 2048
+openssl req -x509 -new -nodes -key /tmp/ssl/root_auth/rootCA.key -sha256 -days 1024 -out /tmp/ssl/root_auth/rootCA.pem -subj "/CN=Xebia/L=Paris/ST=Paris/C=FR"</code></pre>
                     </section>
 
                     <section>
@@ -1381,6 +1381,7 @@ ssl.keystore.password = morghulis
 ssl.key.password = morghulis
 ssl.keystore.location = /tmp/ssl/keystore/server-1.keystore.jks
 ssl.client.auth=required</code></pre>
+                        <p>Redémarrer le broker 1</p>
                     </section>
                     <section>
                         <pre><code class="hljs" data-trim>vi config/server-2.properties
@@ -1395,6 +1396,7 @@ ssl.keystore.password = morghulis
 ssl.key.password = morghulis
 ssl.keystore.location = /tmp/ssl/keystore/server-2.keystore.jks
 ssl.client.auth=required</code></pre>
+                        <p>Redémarrer le broker 2</p>
                     </section>
                 </section>
 
@@ -1423,7 +1425,7 @@ group.id=stark</code></pre>
                     <section>
                         <p>Ramsey Bolton</p>
                         <pre><code class="hljs" data-trim>keytool -keystore /tmp/ssl/keystore/ramsey.keystore.jks -genkeypair -alias Ramsey -validity 500 -genkey -dname "CN=RamseyBolton, OU=xke, O=Xebia, L=Paris, ST=Paris, C=FR" -keypass morghulis -storepass morghulis
-keytool -keystore /tmp/ssl/keystore/ramsey.keystore.jks -alias Jon -certreq -file /tmp/ssl/csr/ramsey.csr --storepass morghulis
+keytool -keystore /tmp/ssl/keystore/ramsey.keystore.jks -alias Ramsey -certreq -file /tmp/ssl/csr/ramsey.csr --storepass morghulis
 openssl x509 -req -CA /tmp/ssl/root_auth/rootCA.pem -CAkey /tmp/ssl/root_auth/rootCA.key -in /tmp/ssl/csr/ramsey.csr -out /tmp/ssl/certs/ramsey.pem -days 500 -CAcreateserial -passin pass:morghulis
 keytool -keystore /tmp/ssl/keystore/ramsey.keystore.jks -alias CARoot -import -file /tmp/ssl/root_auth/rootCA.pem --storepass morghulis --noprompt
 keytool -keystore /tmp/ssl/keystore/ramsey.keystore.jks -alias Ramsey -import -file /tmp/ssl/certs/ramsey.pem --storepass morghulis --noprompt</code></pre>
@@ -1448,23 +1450,6 @@ group.id=bolton</code></pre>
                         <pre><code class="hljs" data-trim>./bin/kafka-acls.sh --authorizer-properties zookeeper.connect=localhost:2181 --topic winterfell --add --allow-principal User:CN=RamseyBolton,OU=xke,O=Xebia,L=Paris,ST=Paris,C=FR --producer
 ./bin/kafka-acls.sh --authorizer-properties zookeeper.connect=localhost:2181 --topic winterfell --add --allow-principal User:CN=JonSnow,OU=xke,O=Xebia,L=Paris,ST=Paris,C=FR --consumer --group stark</code></pre></code></pre>
                     </section>
-                    <section>
-                        <pre><code class="hljs" data-trim>vi config/ssl-client.properties
-
-security.protocol=SSL
-ssl.truststore.location=/Users/slequeux/tools/kafka_2.11-0.11.0.0/ssl/keystore/client-1.keystore.jks
-ssl.truststore.password=morghulis
-ssl.keystore.location=/Users/slequeux/tools/kafka_2.11-0.11.0.0/ssl/keystore/client-1.keystore.jks
-ssl.keystore.password=morghulis
-ssl.key.password=morghulis
-group.id=mygroup
-
-./bin/kafka-console-consumer.sh --topic devoxx --bootstrap-server localhost:9094 --consumer.config config/ssl-client.properties
-./bin/kafka-console-producer.sh --topic devoxx --broker-list 127.0.0.1:9094,127.0.0.1:9095 --producer.config config/ssl-client.properties
-
-./bin/kafka-acls.sh --authorizer-properties zookeeper.connect=localhost:2181 --topic devoxx --add --allow-principal User:CN=client1,OU=xke,O=Xebia,L=Paris,ST=Paris,C=FR --producer
-./bin/kafka-acls.sh --authorizer-properties zookeeper.connect=localhost:2181 --topic devoxx --add --allow-principal User:CN=client1,OU=xke,O=Xebia,L=Paris,ST=Paris,C=FR --consumer --group mygroup</code></pre>
-                    </section>
                 </section>
 
                 <section>
@@ -1472,7 +1457,7 @@ group.id=mygroup
                     <h3>La bataille des batards</h3>
                     <section>
                         <pre><code class="hljs" data-trim>./bin/kafka-console-consumer.sh --topic winterfell --bootstrap-server localhost:9094 --consumer.config config/ssl-jon.properties
-./bin/kafka-console-consumer.sh --topic winterfell --bootstrap-server localhost:9094 --consumer.config config/ssl-ramsey.properties
+./bin/kafka-console-producer.sh --topic winterfell --broker-list localhost:9094 --producer.config config/ssl-ramsey.properties
 > My hounds will never harm me.</code></pre>
                     </section>
                 </section>
