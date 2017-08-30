@@ -1306,6 +1306,179 @@ val kafkaStreams: KafkaStreams = new KafkaStreams(kStreamBuilder, props)</code><
 
                 <section>
                     <h2>Step 6</h2>
+                    <h3>Bonus : Sécurité</h3>
+                    <section data-background="img/ghost.gif"></section>
+                    <section>
+                        <p>Nous allons maintenant sécuriser notre cluster.</p>
+                        <ul>
+                            <li>Authentification : assurer un client qu'il s'adresse bien à notre cluster ET informer
+                                le cluster du client qui veut intéragir avec lui</li>
+                            <li>Autorisation : s'assurer qu'un client est autorisé ou non à effectuer une opération sur
+                                le cluster</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <p>Il existe plusieurs solutions pour sécuriser son cluster</p>
+                        <ul>
+                            <li>Kerberos</li>
+                            <li>Clés SSL : c'est la solution que nous utiliserons aujourd'hui</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <p>Etapes</p>
+                        <ul>
+                            <li>Génération des clés</li>
+                            <li>Ecoute des brokers en SSL</li>
+                            <li>Authentification d'un client en SSL</li>
+                            <li>Activation des ACLs</li>
+                        </ul>
+                    </section>
+                </section>
+
+                <section>
+                    <h2>Step 6_1</h2>
+                    <h3>Configurer les brokers pour écouter en SSL</h3>
+                    <section>
+                        <p>Générer les clés pour les brokers</p>
+                        <p>Ajouter ces clés à la configuration des brokers</p>
+                    </section>
+                    <section>
+                            <pre><code class="hljs" data-trim>mkdir -p /tmp/ssl/keystore
+mkdir -p /tmp/ssl/csr
+mkdir -p /tmp/ssl/certs
+mkdir -p /tmp/ssl/root_auth
+
+openssl genrsa -out -p /tmp/ssl/root_auth/rootCA.key 2048
+openssl req -x509 -new -nodes -key -p /tmp/ssl/root_auth/rootCA.key -sha256 -days 1024 -out /tmp/ssl/root_auth/rootCA.pem -subj "/CN=Xebia/L=Paris/ST=Paris/C=FR"</code></pre>
+                    </section>
+
+                    <section>
+                        <pre><code class="hljs" data-trim>keytool -keystore /tmp/ssl/keystore/server-1.keystore.jks -genkeypair -alias server1 -validity 500 -genkey -dname "CN=server1, OU=xke, O=Xebia, L=Paris, ST=Paris, C=FR" -keypass morghulis -storepass morghulis
+keytool -keystore /tmp/ssl/keystore/server-2.keystore.jks -genkeypair -alias server2 -validity 500 -genkey -dname "CN=server2, OU=xke, O=Xebia, L=Paris, ST=Paris, C=FR" -keypass morghulis -storepass morghulis
+
+keytool -keystore /tmp/ssl/keystore/server-1.keystore.jks -alias server1 -certreq -file /tmp/ssl/csr/server1.csr --storepass morghulis
+keytool -keystore /tmp/ssl/keystore/server-2.keystore.jks -alias server2 -certreq -file /tmp/ssl/csr/server2.csr --storepass morghulis
+
+openssl x509 -req -CA /tmp/ssl/root_auth/rootCA.pem -CAkey /tmp/ssl/root_auth/rootCA.key -in /tmp/ssl/csr/server1.csr -out /tmp/ssl/certs/server1.pem -days 500 -CAcreateserial -passin pass:morghulis
+openssl x509 -req -CA /tmp/ssl/root_auth/rootCA.pem -CAkey /tmp/ssl/root_auth/rootCA.key -in /tmp/ssl/csr/server2.csr -out /tmp/ssl/certs/server2.pem -days 500 -CAcreateserial -passin pass:morghulis
+
+keytool -keystore /tmp/ssl/keystore/server-1.keystore.jks -alias CARoot -import -file /tmp/ssl/root_auth/rootCA.pem --storepass morghulis --noprompt
+keytool -keystore /tmp/ssl/keystore/server-2.keystore.jks -alias CARoot -import -file /tmp/ssl/root_auth/rootCA.pem --storepass morghulis --noprompt
+
+keytool -keystore /tmp/ssl/keystore/server-1.keystore.jks -alias server1 -import -file /tmp/ssl/certs/server1.pem --storepass morghulis --noprompt
+keytool -keystore /tmp/ssl/keystore/server-2.keystore.jks -alias server2 -import -file /tmp/ssl/certs/server2.pem --storepass morghulis --noprompt</code></pre>
+                    </section>
+                    <section>
+                        <pre><code class="hljs" data-trim>vi config/server-1.properties
+
+listeners=PLAINTEXT://:9092,SSL://:9094
+ssl.truststore.type = JKS
+ssl.keystore.type = JKS
+security.inter.broker.protocol = SSL
+ssl.truststore.password = morghulis
+ssl.truststore.location = /tmp/ssl/keystore/server-1.keystore.jks
+ssl.keystore.password = morghulis
+ssl.key.password = morghulis
+ssl.keystore.location = /tmp/ssl/keystore/server-1.keystore.jks
+ssl.client.auth=required</code></pre>
+                    </section>
+                    <section>
+                        <pre><code class="hljs" data-trim>vi config/server-2.properties
+
+listeners=PLAINTEXT://:9093,SSL://:9095
+ssl.truststore.type = JKS
+ssl.keystore.type = JKS
+security.inter.broker.protocol = SSL
+ssl.truststore.password = morghulis
+ssl.truststore.location = /tmp/ssl/keystore/server-2.keystore.jks
+ssl.keystore.password = morghulis
+ssl.key.password = morghulis
+ssl.keystore.location = /tmp/ssl/keystore/server-2.keystore.jks
+ssl.client.auth=required</code></pre>
+                    </section>
+                </section>
+
+                <section>
+                    <h2>Step 6_2</h2>
+                    <h3>Générer les clés SSL pour les prétendants</h3>
+                    <section>
+                        <p>Jon Snow</p>
+                        <pre><code class="hljs" data-trim>keytool -keystore /tmp/ssl/keystore/jon.keystore.jks -genkeypair -alias Jon -validity 500 -genkey -dname "CN=JonSnow, OU=xke, O=Xebia, L=Paris, ST=Paris, C=FR" -keypass morghulis -storepass morghulis
+keytool -keystore /tmp/ssl/keystore/jon.keystore.jks -alias Jon -certreq -file /tmp/ssl/csr/jon.csr --storepass morghulis
+openssl x509 -req -CA /tmp/ssl/root_auth/rootCA.pem -CAkey /tmp/ssl/root_auth/rootCA.key -in /tmp/ssl/csr/jon.csr -out /tmp/ssl/certs/jon.pem -days 500 -CAcreateserial -passin pass:morghulis
+keytool -keystore /tmp/ssl/keystore/jon.keystore.jks -alias CARoot -import -file /tmp/ssl/root_auth/rootCA.pem --storepass morghulis --noprompt
+keytool -keystore /tmp/ssl/keystore/jon.keystore.jks -alias Jon -import -file /tmp/ssl/certs/jon.pem --storepass morghulis --noprompt</code></pre>
+                    </section>
+                    <section>
+                        <pre><code class="hljs" data-trim>vi config/ssl-jon.properties
+
+security.protocol=SSL
+ssl.truststore.location=/tmp/ssl/keystore/jon.keystore.jks
+ssl.truststore.password=morghulis
+ssl.keystore.location=/tmp/ssl/keystore/jon.keystore.jks
+ssl.keystore.password=morghulis
+ssl.key.password=morghulis
+group.id=stark</code></pre>
+                    </section>
+                    <section>
+                        <p>Ramsey Bolton</p>
+                        <pre><code class="hljs" data-trim>keytool -keystore /tmp/ssl/keystore/ramsey.keystore.jks -genkeypair -alias Ramsey -validity 500 -genkey -dname "CN=RamseyBolton, OU=xke, O=Xebia, L=Paris, ST=Paris, C=FR" -keypass morghulis -storepass morghulis
+keytool -keystore /tmp/ssl/keystore/ramsey.keystore.jks -alias Jon -certreq -file /tmp/ssl/csr/ramsey.csr --storepass morghulis
+openssl x509 -req -CA /tmp/ssl/root_auth/rootCA.pem -CAkey /tmp/ssl/root_auth/rootCA.key -in /tmp/ssl/csr/ramsey.csr -out /tmp/ssl/certs/ramsey.pem -days 500 -CAcreateserial -passin pass:morghulis
+keytool -keystore /tmp/ssl/keystore/ramsey.keystore.jks -alias CARoot -import -file /tmp/ssl/root_auth/rootCA.pem --storepass morghulis --noprompt
+keytool -keystore /tmp/ssl/keystore/ramsey.keystore.jks -alias Ramsey -import -file /tmp/ssl/certs/ramsey.pem --storepass morghulis --noprompt</code></pre>
+                    </section>
+                    <section>
+                        <pre><code class="hljs" data-trim>vi config/ssl-ramsey.properties
+
+security.protocol=SSL
+ssl.truststore.location=/tmp/ssl/keystore/ramsey.keystore.jks
+ssl.truststore.password=morghulis
+ssl.keystore.location=/tmp/ssl/keystore/ramsey.keystore.jks
+ssl.keystore.password=morghulis
+ssl.key.password=morghulis
+group.id=bolton</code></pre>
+                    </section>
+                </section>
+
+                <section>
+                    <h2>Step 6_3</h2>
+                    <h3>Configurer les ACLs</h3>
+                    <section>
+                        <pre><code class="hljs" data-trim>./bin/kafka-acls.sh --authorizer-properties zookeeper.connect=localhost:2181 --topic winterfell --add --allow-principal User:CN=RamseyBolton,OU=xke,O=Xebia,L=Paris,ST=Paris,C=FR --producer
+./bin/kafka-acls.sh --authorizer-properties zookeeper.connect=localhost:2181 --topic winterfell --add --allow-principal User:CN=JonSnow,OU=xke,O=Xebia,L=Paris,ST=Paris,C=FR --consumer --group stark</code></pre></code></pre>
+                    </section>
+                    <section>
+                        <pre><code class="hljs" data-trim>vi config/ssl-client.properties
+
+security.protocol=SSL
+ssl.truststore.location=/Users/slequeux/tools/kafka_2.11-0.11.0.0/ssl/keystore/client-1.keystore.jks
+ssl.truststore.password=morghulis
+ssl.keystore.location=/Users/slequeux/tools/kafka_2.11-0.11.0.0/ssl/keystore/client-1.keystore.jks
+ssl.keystore.password=morghulis
+ssl.key.password=morghulis
+group.id=mygroup
+
+./bin/kafka-console-consumer.sh --topic devoxx --bootstrap-server localhost:9094 --consumer.config config/ssl-client.properties
+./bin/kafka-console-producer.sh --topic devoxx --broker-list 127.0.0.1:9094,127.0.0.1:9095 --producer.config config/ssl-client.properties
+
+./bin/kafka-acls.sh --authorizer-properties zookeeper.connect=localhost:2181 --topic devoxx --add --allow-principal User:CN=client1,OU=xke,O=Xebia,L=Paris,ST=Paris,C=FR --producer
+./bin/kafka-acls.sh --authorizer-properties zookeeper.connect=localhost:2181 --topic devoxx --add --allow-principal User:CN=client1,OU=xke,O=Xebia,L=Paris,ST=Paris,C=FR --consumer --group mygroup</code></pre>
+                    </section>
+                </section>
+
+                <section>
+                    <h2>Step 6_4</h2>
+                    <h3>La bataille des batards</h3>
+                    <section>
+                        <pre><code class="hljs" data-trim>./bin/kafka-console-consumer.sh --topic winterfell --bootstrap-server localhost:9094 --consumer.config config/ssl-jon.properties
+./bin/kafka-console-consumer.sh --topic winterfell --bootstrap-server localhost:9094 --consumer.config config/ssl-ramsey.properties
+> My hounds will never harm me.</code></pre>
+                    </section>
+                </section>
+
+                <section>
+                    <h2>Step 7</h2>
                     <h3>Bonus : Spark Streaming Client</h3>
                     <section data-background="img/bbV0dIIjL0rgA.gif"></section>
                     <section>
@@ -1327,7 +1500,7 @@ val kafkaStreams: KafkaStreams = new KafkaStreams(kStreamBuilder, props)</code><
                 </section>
 
                 <section>
-                    <h2>Step 6_1</h2>
+                    <h2>Step 7_1</h2>
                     <section></section>
                     <section>
                         <p>Nous allons commencer par créer un context de streaming spark.</p>
@@ -1358,7 +1531,7 @@ val kafkaStreams: KafkaStreams = new KafkaStreams(kStreamBuilder, props)</code><
                 </section>
 
                 <section>
-                    <h2>Step 6_2</h2>
+                    <h2>Step 7_2</h2>
                     <section></section>
                     <section>
                         <p>Nous allons maintenant créer le stream de données.</p>
@@ -1389,7 +1562,7 @@ val kafkaStreams: KafkaStreams = new KafkaStreams(kStreamBuilder, props)</code><
                 </section>
 
                 <section>
-                    <h2>Step 6_3</h2>
+                    <h2>Step 7_3</h2>
                     <section></section>
                     <section>
                         <p>La dernière étape consiste à traiter les données que l'on reçoit.
