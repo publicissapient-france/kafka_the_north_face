@@ -15,7 +15,7 @@ object ScalaKStream {
     val kStreamBuilder: KStreamBuilder = new KStreamBuilder
 
     // TODO 5_2 : Create a source KStream : the stream of messages from topic winterfell connect
-    val source: KStream[String, String] = kStreamBuilder.stream("winterfell-connect")
+    ???
 
     // TODO 5_3 : Create a new sink KStream from the source KStream with the map method : send new KeyValue message, prepend "STREAM : " to the value of the message
     ???
