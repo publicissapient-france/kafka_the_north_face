@@ -37,13 +37,7 @@ public class JavaConsumer {
     private static KafkaConsumer<String, String> createKafkaConsumer() {
         // TODO 2_1
         Map<String, Object> props = new HashMap<>();
-        // required properties
-        props.put("bootstrap.servers", "localhost:9092,localhost:9093");
-        props.put("group.id", "whatever");
-        props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 
-        // optional properties
 
         // TODO 2_3
 

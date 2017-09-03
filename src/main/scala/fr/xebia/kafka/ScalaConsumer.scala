@@ -31,10 +31,7 @@ object ScalaConsumer {
     import scala.collection.JavaConversions._
     // TODO 2_1
     val props = Map(
-      "bootstrap.servers" -> "localhost:9092,localhost:9093",
-      "group.id" -> "whatever",
-      "key.deserializer" -> "org.apache.kafka.common.serialization.StringDeserializer",
-      "value.deserializer" -> "org.apache.kafka.common.serialization.StringDeserializer",
+      ???,
       // TODO 2_3
       ???,
       "session.timeout.ms" -> "30000",
