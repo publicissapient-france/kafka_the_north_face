@@ -27,13 +27,7 @@ public class JavaKStream {
         sink.to("winterfell-streams-out");
 
         // TODO 5_5 : Create a KafkaStreams object from this KStreamBuilder and a Properties object
-        Properties props = new Properties();
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams");
-        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092,localhost:9093");
-        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.StringSerde.class);
-        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.StringSerde.class);
 
-        KafkaStreams kafkaStreams = new KafkaStreams(kStreamBuilder, props);
 
         // TODO 5_6 : start the KafkaStreams
     }

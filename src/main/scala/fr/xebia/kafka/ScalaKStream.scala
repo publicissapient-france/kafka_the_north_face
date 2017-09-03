@@ -28,13 +28,7 @@ object ScalaKStream {
     sink.to("winterfell-streams-out")
 
     // TODO 5_5 : Create a KafkaStreams object from this KStreamBuilder and a Properties object
-    val props: Properties = new Properties
-    props.put("application.id", "streams")
-    props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092,localhost:9093")
-    props.put("default.key.serde", classOf[StringSerde])
-    props.put("default.value.serde", classOf[StringSerde])
-
-    val kafkaStreams: KafkaStreams = new KafkaStreams(kStreamBuilder, props)
+    ???
 
     // TODO 5_6 : start the KafkaStreams
     ???
