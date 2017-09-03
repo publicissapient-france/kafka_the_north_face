@@ -113,20 +113,7 @@ public class JavaConsumer {
 
     private static void manualAsynchronousCommit(KafkaConsumer<String, String> consumer) {
         // TODO 2_5
-        consumer.commitAsync((offsets, exception) -> {
-            if (exception != null) {
-                exception.printStackTrace();
-            } else if (offsets != null) {
-                offsets.entrySet().stream().forEach(
-                        entry -> {
-                            TopicPartition topicPartition = entry.getKey();
-                            OffsetAndMetadata offsetAndMetadata = entry.getValue();
-                            System.out.printf("commited offset %d for partition %d of topic %s%n",
-                                    offsetAndMetadata.offset(), topicPartition.partition(), topicPartition.topic());
-                        }
-                );
-            }
-        });
+
     }
 
     // TODO 2_6

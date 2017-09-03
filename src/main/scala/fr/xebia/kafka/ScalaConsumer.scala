@@ -73,21 +73,7 @@ object ScalaConsumer {
   private def manualAsynchronousCommit(consumer: KafkaConsumer[String, String]) {
     // TODO 2_5
     import scala.collection.JavaConversions._
-    consumer.commitAsync {
-      new OffsetCommitCallback {
-        override def onComplete(offsets: util.Map[TopicPartition, OffsetAndMetadata], exception: Exception) {
-          if (exception != null) {
-            exception.printStackTrace()
-          } else if (offsets != null) offsets.entrySet().foreach(
-            entry => {
-              val topicPartition = entry.getKey
-              val offsetAndMetadata = entry.getValue
-              println(s"commited offset ${offsetAndMetadata.offset} for partition ${topicPartition.partition} of topic ${topicPartition.topic}")
-            }
-          )
-        }
-      }
-    }
+    ???
   }
 
 }
