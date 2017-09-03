@@ -28,11 +28,7 @@ public class JavaSparkStreaming {
 
     public static JavaStreamingContext createStreamContext() {
         // TODO Step 7_1
-        SparkConf conf = new SparkConf()
-                .setMaster("local[2]")
-                .setAppName("streaming-client");
-
-        return new JavaStreamingContext(conf, Durations.seconds(5));
+        return null;
     }
 
     public static JavaInputDStream<ConsumerRecord<String, String>> createStream(JavaStreamingContext context) {

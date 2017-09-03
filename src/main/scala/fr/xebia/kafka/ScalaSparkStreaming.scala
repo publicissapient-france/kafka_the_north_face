@@ -24,11 +24,7 @@ object ScalaSparkStreaming {
 
   def createStreamContext(): StreamingContext = {
     // TODO Step 7_1
-    val conf = new SparkConf()
-      .setMaster("local[2]")
-      .setAppName("kafka-spark-streaming")
-
-    new StreamingContext(new SparkContext(conf), Seconds(5))
+    ???
   }
 
   def createStream(context: StreamingContext): InputDStream[ConsumerRecord[String, String]] = {
