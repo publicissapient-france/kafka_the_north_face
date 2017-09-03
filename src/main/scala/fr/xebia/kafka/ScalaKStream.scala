@@ -25,7 +25,7 @@ object ScalaKStream {
     }
 
     // TODO 5_4 : Send the message from the sink KStream to the Kafka topic winterfell-streams-out
-    sink.to("winterfell-streams-out")
+    ???
 
     // TODO 5_5 : Create a KafkaStreams object from this KStreamBuilder and a Properties object
     ???
