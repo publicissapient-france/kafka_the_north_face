@@ -57,11 +57,9 @@ public class JavaConsumer {
         // optional properties
 
         // TODO 2_3
-        // This parameter controls whether the consumer will commit offsets automatically
-        props.put("enable.auto.commit", "true");
 
-        // The frequency in milliseconds that the consumer offsets are auto-committed to Kafka if enable.auto.commit is set to true.
-        props.put("auto.commit.interval.ms", "5000");
+
+
 
         // The amount of time a consumer can be out of contact with the brokers while still considered alive
         props.put("session.timeout.ms", "30000");

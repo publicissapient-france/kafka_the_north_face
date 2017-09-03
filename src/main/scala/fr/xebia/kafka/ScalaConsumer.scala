@@ -47,8 +47,7 @@ object ScalaConsumer {
       "key.deserializer" -> "org.apache.kafka.common.serialization.StringDeserializer",
       "value.deserializer" -> "org.apache.kafka.common.serialization.StringDeserializer",
       // TODO 2_3
-      "enable.auto.commit" -> "true",
-      "auto.commit.interval.ms" -> "5000",
+      ???,
       "session.timeout.ms" -> "30000",
       "heartbeat.interval.ms" -> "3000",
       "fetch.min.bytes" -> "1",
