@@ -24,11 +24,6 @@ public class JavaSparkStreaming {
         JavaInputDStream<ConsumerRecord<String, String>> stream = createStream(context);
 
         // TODO Step 7_3
-        stream.map(v1 -> extractValueFromRecord(v1.value()))
-            .foreachRDD(JavaSparkStreaming::displayAvg);
-
-        context.start();
-        context.awaitTermination();
     }
 
     public static JavaStreamingContext createStreamContext() {

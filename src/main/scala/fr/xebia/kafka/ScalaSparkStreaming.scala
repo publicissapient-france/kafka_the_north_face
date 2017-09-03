@@ -20,12 +20,6 @@ object ScalaSparkStreaming {
     val stream = createStream(streamingContext)
 
     // TODO Step 7_3
-    stream.map(_.value())
-      .map(extractValueFromRecord)
-      .foreachRDD(rdd => displayAvg(rdd))
-
-    streamingContext.start()
-    streamingContext.awaitTermination()
   }
 
   def createStreamContext(): StreamingContext = {
