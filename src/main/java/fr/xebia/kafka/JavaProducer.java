@@ -95,12 +95,7 @@ public class JavaProducer {
 
     private static void sendSynchronously(KafkaProducer<String, String> producer, ProducerRecord<String, String> record) {
         // TODO 1_3
-        try {
-            producer.send(record).get();
-        } catch (Exception e) {
-            // catch all exceptions
-            e.printStackTrace();
-        }
+
     }
 
     private static void sendAsynchronously(KafkaProducer<String, String> producer, ProducerRecord<String, String> record) {

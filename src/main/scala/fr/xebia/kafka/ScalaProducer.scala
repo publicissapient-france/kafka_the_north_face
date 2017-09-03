@@ -90,13 +90,7 @@ object ScalaProducer {
 
   private def sendSynchronously(producer: KafkaProducer[String, String], record: ProducerRecord[String, String]) {
     // TODO 1_3
-    try {
-      producer.send(record).get
-    } catch {
-      case e: Exception =>
-        // catch all exceptions
-        e.printStackTrace()
-    }
+    ???
   }
 
   private def sendAsynchronously(producer: KafkaProducer[String, String], record: ProducerRecord[String, String]) {
