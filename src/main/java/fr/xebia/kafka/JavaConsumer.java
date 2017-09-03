@@ -132,19 +132,11 @@ public class JavaConsumer {
     // TODO 2_6
     private static class HandleRebalance implements ConsumerRebalanceListener {
         public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
-            partitions.stream().forEach(
-                    topicPartition ->
-                            System.out.printf("Assigned partition %d of topic %s%n",
-                                    topicPartition.partition(), topicPartition.topic())
-            );
+
         }
 
         public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
-            partitions.stream().forEach(
-                    topicPartition ->
-                            System.out.printf("Revoked partition %d of topic %s%n",
-                                    topicPartition.partition(), topicPartition.topic())
-            );
+
         }
     }
 

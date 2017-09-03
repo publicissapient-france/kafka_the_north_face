@@ -96,11 +96,11 @@ object ScalaConsumer {
 class HandleRebalance extends ConsumerRebalanceListener {
   import scala.collection.JavaConversions._
   override def onPartitionsAssigned(partitions: util.Collection[TopicPartition]) {
-    partitions.foreach(topicPartition => println(s"Assigned partition ${topicPartition.partition} of topic ${topicPartition.topic}"))
+    ???
   }
 
   override def onPartitionsRevoked(partitions: util.Collection[TopicPartition]) {
-    partitions.foreach(topicPartition => println(s"Revoked partition ${topicPartition.partition} of topic ${topicPartition.topic}"))
+    ???
   }
 }
 
