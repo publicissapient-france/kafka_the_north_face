@@ -31,10 +31,7 @@ object ScalaBatchConsumer {
   private def assignPartitions(consumer: KafkaConsumer[String, String]) {
     // TODO 3_2
     import scala.collection.JavaConversions._
-    val partitionInfos = consumer.partitionsFor("winterfell")
-    val topicPartitions = partitionInfos.map(partitionInfo => new TopicPartition("winterfell", partitionInfo.partition()))
-    System.out.println(topicPartitions)
-    consumer.assign(topicPartitions)
+    ???
   }
 
   private def seek(consumer: KafkaConsumer[String, String]) {

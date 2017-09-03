@@ -38,13 +38,7 @@ public class JavaBatchConsumer {
 
     private static void assignPartitions(KafkaConsumer<String, String> consumer) {
         // TODO 3_2
-        List<PartitionInfo> partitionInfos = consumer.partitionsFor("winterfell");
-        List<TopicPartition> topicPartitions =  partitionInfos.stream()
-                .map(partitionInfo -> new TopicPartition("winterfell", partitionInfo.partition()))
-                .collect(Collectors.toList());
 
-        System.out.println(topicPartitions);
-        consumer.assign(topicPartitions);
     }
 
     private static void seek(KafkaConsumer<String, String> consumer) {
