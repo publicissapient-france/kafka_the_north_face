@@ -25,9 +25,7 @@ object ScalaProducer {
     // TODO 1_1
     import scala.collection.JavaConversions._
     val props = Map(
-      "bootstrap.servers" -> "localhost:9092,localhost:9093",
-      "value.serializer" -> "org.apache.kafka.common.serialization.StringSerializer",
-      "key.serializer" -> "org.apache.kafka.common.serialization.StringSerializer",
+      ???,
 
 
       // optional properties

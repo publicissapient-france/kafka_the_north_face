@@ -39,11 +39,11 @@ public class JavaProducer {
         Map<String, Object> props = new HashMap<>();
 
         // required properties
-        props.put("bootstrap.servers", "localhost:9092,localhost:9093");
-        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 
-        // optional properties
+
+
+
+
         // 0 : will not wait for any reply from the broker before assuming the message was sent successfully
         // 1 : will receive a success response from the broker the moment the leader replica received the message
         // -1 or all : the Producer will receive a success response from the broker once all in-sync replicas received the message
