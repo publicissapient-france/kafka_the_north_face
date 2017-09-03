@@ -39,7 +39,7 @@ object ScalaBatchConsumer {
 
   private def seek(consumer: KafkaConsumer[String, String]) {
     // TODO 3_3
-    consumer.seekToBeginning(consumer.assignment())
+    ???
   }
 
   private def process(consumer: KafkaConsumer[String, String]) {

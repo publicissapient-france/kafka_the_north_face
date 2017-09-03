@@ -49,7 +49,7 @@ public class JavaBatchConsumer {
 
     private static void seek(KafkaConsumer<String, String> consumer) {
         // TODO 3_3
-        consumer.seekToBeginning(consumer.assignment());
+
     }
 
 
