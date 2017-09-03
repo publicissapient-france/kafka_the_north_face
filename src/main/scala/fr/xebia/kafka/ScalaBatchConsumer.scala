@@ -45,13 +45,7 @@ object ScalaBatchConsumer {
   private def process(consumer: KafkaConsumer[String, String]) {
     // TODO 3_4
     import scala.collection.JavaConversions._
-    var records = consumer.poll(1000)
-    while (!records.isEmpty) {
-      for (record <- records) {
-        println(s"topic = ${record.topic}, partition: ${record.partition}, offset: ${record.offset}: ${record.value}")
-      }
-      records = consumer.poll(1000)
-    }
+    ???
   }
 
 }

@@ -56,14 +56,7 @@ public class JavaBatchConsumer {
 
     private static void process(KafkaConsumer<String, String> consumer) {
         // TODO 3_4
-        ConsumerRecords<String, String> records = consumer.poll(1000);
-        while (!records.isEmpty()) {
-            for (ConsumerRecord<String, String> record : records) {
-                System.out.println(String.format("topic = %s, partition: %d, offset: %d: %s", record.topic(), record.partition(),
-                        record.offset(), record.value()));
-            }
-            records = consumer.poll(1000);
-        }
+
     }
 
 
