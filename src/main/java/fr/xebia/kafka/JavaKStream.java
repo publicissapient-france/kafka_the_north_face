@@ -15,7 +15,7 @@ public class JavaKStream {
         System.out.println("GO");
 
         // TODO 5_1 : Create a KStreamBuilder
-        KStreamBuilder kStreamBuilder = new KStreamBuilder();
+
 
         // TODO 5_2 : Create a source KStream : the stream of messages from topic winterfell connect
 
