@@ -63,7 +63,7 @@ object ScalaConsumer {
   private def manualCommit(consumer: KafkaConsumer[String, String]) {
     // TODO 2_4
     try {
-      consumer.commitSync()
+      ???
     } catch {
       case e: CommitFailedException =>
         e.printStackTrace()

@@ -105,7 +105,7 @@ public class JavaConsumer {
     private static void manualCommit(KafkaConsumer<String, String> consumer) {
         // TODO 2_4
         try {
-            consumer.commitSync();
+
         } catch (CommitFailedException e) {
             e.printStackTrace();
         }
