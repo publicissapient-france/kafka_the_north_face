@@ -31,18 +31,7 @@ public class JavaConsumer {
         });
 
         // TODO 2_2
-        consumer.subscribe(Collections.singletonList("winterfell"), new HandleRebalance());
-        try {
-            while (true) {
-                ConsumerRecords<String, String> records = consumer.poll(1000);
-                for (ConsumerRecord<String, String> record : records) {
-                    display(record);
-                }
-                manualCommit(consumer);
-            }
-        } finally {
-            consumer.close();
-        }
+
     }
 
     private static KafkaConsumer<String, String> createKafkaConsumer() {

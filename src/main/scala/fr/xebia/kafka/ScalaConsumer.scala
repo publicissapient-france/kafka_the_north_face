@@ -20,18 +20,7 @@ object ScalaConsumer {
     }
 
     // TODO 2_2
-    consumer.subscribe(Collections.singletonList("winterfell"), new HandleRebalance())
-    try {
-      while (true) {
-        val records: ConsumerRecords[String, String] = consumer.poll(1000)
-        for (record <- records) {
-          display(record)
-        }
-        manualCommit(consumer)
-      }
-    } finally {
-      consumer.close()
-    }
+    ???
   }
 
   private def display(record: ConsumerRecord[String, String]) {
