@@ -25,15 +25,7 @@ public class JavaBatchConsumer {
 
     private static KafkaConsumer<String, String> createKafkaConsumer() {
         // TODO 3_1
-        Map<String, Object> props = new HashMap<>();
-
-        props.put("bootstrap.servers", "localhost:9092,localhost:9093");
-        props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        props.put("enable.auto.commit", "false");
-        props.put("group.id", "batch");
-
-        return new KafkaConsumer<>(props);
+        return null;
     }
 
     private static void assignPartitions(KafkaConsumer<String, String> consumer) {

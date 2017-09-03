@@ -18,14 +18,7 @@ object ScalaBatchConsumer {
   private def createKafkaConsumer(): KafkaConsumer[String, String] = {
     // TODO 3_1
     import scala.collection.JavaConversions._
-    val props = Map(
-      "bootstrap.servers" -> "localhost:9092,localhost:9093",
-      "key.deserializer" -> "org.apache.kafka.common.serialization.StringDeserializer",
-      "value.deserializer" -> "org.apache.kafka.common.serialization.StringDeserializer",
-      "enable.auto.commit" -> "false",
-      "group.id" -> "batch"
-    )
-    new KafkaConsumer[String, String](props)
+    ???
   }
 
   private def assignPartitions(consumer: KafkaConsumer[String, String]) {
