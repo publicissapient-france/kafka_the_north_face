@@ -37,7 +37,7 @@ object ScalaKStream {
     val kafkaStreams: KafkaStreams = new KafkaStreams(kStreamBuilder, props)
 
     // TODO 5_6 : start the KafkaStreams
-    kafkaStreams.start()
+    ???
   }
 
 }

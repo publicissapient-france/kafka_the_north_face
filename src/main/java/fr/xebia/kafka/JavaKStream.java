@@ -36,6 +36,5 @@ public class JavaKStream {
         KafkaStreams kafkaStreams = new KafkaStreams(kStreamBuilder, props);
 
         // TODO 5_6 : start the KafkaStreams
-        kafkaStreams.start();
     }
 }
