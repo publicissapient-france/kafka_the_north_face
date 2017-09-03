@@ -33,21 +33,7 @@ object ScalaSparkStreaming {
 
   def createStream(context: StreamingContext): InputDStream[ConsumerRecord[String, String]] = {
     // TODO Step 7_2
-    val kafkaParams = Map[String, Object](
-      "bootstrap.servers" -> "localhost:9092,localhost:9093",
-      "key.deserializer" -> classOf[StringDeserializer],
-      "value.deserializer" -> classOf[StringDeserializer],
-      "group.id" -> "streaming-client",
-      "auto.offset.reset" -> "latest",
-      "enable.auto.commit" -> (false: java.lang.Boolean)
-    )
-
-    val topics = Array("winterfell")
-    KafkaUtils.createDirectStream[String, String](
-      context,
-      LocationStrategies.PreferConsistent,
-      ConsumerStrategies.Subscribe[String, String](topics, kafkaParams)
-    )
+    ???
   }
 
   def extractValueFromRecord(line: String): Double = {

@@ -37,21 +37,7 @@ public class JavaSparkStreaming {
 
     public static JavaInputDStream<ConsumerRecord<String, String>> createStream(JavaStreamingContext context) {
         // TODO Step 7_2
-        Collection<String> topics = Collections.singletonList("winterfell");
-
-        Map<String, Object> kafkaParams = new HashMap<>();
-        kafkaParams.put("bootstrap.servers", "localhost:9092,localhost:9093");
-        kafkaParams.put("key.deserializer", StringDeserializer.class);
-        kafkaParams.put("value.deserializer", StringDeserializer.class);
-        kafkaParams.put("group.id", "streaming-client");
-        kafkaParams.put("auto.offset.reset", "latest");
-        kafkaParams.put("enable.auto.commit", false);
-
-        return KafkaUtils.createDirectStream(
-                context,
-                LocationStrategies.PreferConsistent(),
-                ConsumerStrategies.<String, String>Subscribe(topics, kafkaParams)
-        );
+        return null;
     }
 
     public static double extractValueFromRecord(String line) {
