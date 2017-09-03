@@ -79,13 +79,7 @@ object ScalaProducer {
 
   private def fireAndForget(producer: KafkaProducer[String, String], record: ProducerRecord[String, String]) {
     // TODO 1_2
-    try {
-      producer.send(record)
-    } catch {
-      case e: Exception =>
-        // only catch exception before sending message
-        e.printStackTrace()
-    }
+    ???
   }
 
   private def sendSynchronously(producer: KafkaProducer[String, String], record: ProducerRecord[String, String]) {

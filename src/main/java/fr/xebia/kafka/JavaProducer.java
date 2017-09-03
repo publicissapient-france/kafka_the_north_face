@@ -85,12 +85,7 @@ public class JavaProducer {
 
     private static void fireAndForget(KafkaProducer<String, String> producer, ProducerRecord<String, String> record) {
         // TODO 1_2
-        try {
-            producer.send(record);
-        } catch (Exception e) {
-            // only catch exception before sending message
-            e.printStackTrace();
-        }
+
     }
 
     private static void sendSynchronously(KafkaProducer<String, String> producer, ProducerRecord<String, String> record) {
