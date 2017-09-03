@@ -21,7 +21,7 @@ public class JavaKStream {
         KStream<String, String> source = kStreamBuilder.stream("winterfell-connect");
 
         // TODO 5_3 : Create a new sink KStream from the source KStream with the map method : send new KeyValue message, prepend "STREAM : " to the value of the message
-        KStream<String, String> sink = source.map((key, value) -> new KeyValue<>(key, "STREAM : " + value));
+
 
         // TODO 5_4 : Send the message from the sink KStream to the Kafka topic winterfell-streams-out
 
