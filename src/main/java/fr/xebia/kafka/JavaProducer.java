@@ -45,8 +45,6 @@ public class JavaProducer {
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 
         // optional properties
-
-        // TODO 1_5
         // 0 : will not wait for any reply from the broker before assuming the message was sent successfully
         // 1 : will receive a success response from the broker the moment the leader replica received the message
         // -1 or all : the Producer will receive a success response from the broker once all in-sync replicas received the message
@@ -106,30 +104,15 @@ public class JavaProducer {
     }
 
     private static void sendAsynchronously(KafkaProducer<String, String> producer, ProducerRecord<String, String> record) {
-        // TODO 1_4
         producer.send(record,
                 (recordMetadata, e) -> {
                     if (e != null) {
                         e.printStackTrace();
                     } else {
-                        System.out.printf("message %d sent to partition %d of topic %s%n",
-                                recordMetadata.offset(), recordMetadata.partition(), recordMetadata.topic());
+                        // TODO 1_4
+
                     }
                 });
-    }
-
-    // TODO 1_4
-    private static class DemoProducerCallback implements Callback {
-        @Override
-        public void onCompletion(RecordMetadata recordMetadata, Exception e) {
-            if (e != null) {
-                // catch message send
-                e.printStackTrace();
-            } else if (recordMetadata != null) {
-                System.out.printf("message %d sent to partition %d of topic %s%n",
-                        recordMetadata.offset(), recordMetadata.partition(), recordMetadata.topic());
-            }
-        }
     }
 
 

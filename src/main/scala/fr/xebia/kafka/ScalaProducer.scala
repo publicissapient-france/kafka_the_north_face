@@ -30,7 +30,7 @@ object ScalaProducer {
       "value.serializer" -> "org.apache.kafka.common.serialization.StringSerializer",
       "key.serializer" -> "org.apache.kafka.common.serialization.StringSerializer",
 
-      // TODO 1_5
+
       // optional properties
       // 0 : will not wait for any reply from the broker before assuming the message was sent successfully
       // 1 : will receive a success response from the broker the moment the leader replica received the message
@@ -101,7 +101,7 @@ object ScalaProducer {
 
   private def sendAsynchronously(producer: KafkaProducer[String, String], record: ProducerRecord[String, String]) {
     // TODO 1_4
-    producer.send(record, new DemoProducerCallback())
+    ???
   }
 
 }
@@ -112,7 +112,7 @@ class DemoProducerCallback extends Callback {
     if (e != null) {
       e.printStackTrace()
     } else if (recordMetadata != null) {
-      println(s"message ${recordMetadata.offset} sent to partition ${recordMetadata.partition} of topic ${recordMetadata.topic}")
+      ???
     }
   }
 }
