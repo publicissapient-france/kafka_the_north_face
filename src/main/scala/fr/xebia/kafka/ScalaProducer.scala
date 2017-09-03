@@ -16,8 +16,7 @@ object ScalaProducer {
     while (true) {
       // TODO 1_2
       val message: String = produceData()
-      val record: ProducerRecord[String, String] = new ProducerRecord[String, String]("winterfell", message)
-      sendAsynchronously(producer, record)
+      ???
       Thread.sleep(1000)
     }
   }
