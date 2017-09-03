@@ -23,7 +23,7 @@ public class JavaSparkStreaming {
         JavaStreamingContext context = createStreamContext();
         JavaInputDStream<ConsumerRecord<String, String>> stream = createStream(context);
 
-        // TODO Step 6_3
+        // TODO Step 7_3
         stream.map(v1 -> extractValueFromRecord(v1.value()))
             .foreachRDD(JavaSparkStreaming::displayAvg);
 
@@ -32,7 +32,7 @@ public class JavaSparkStreaming {
     }
 
     public static JavaStreamingContext createStreamContext() {
-        // TODO Step 6_1
+        // TODO Step 7_1
         SparkConf conf = new SparkConf()
                 .setMaster("local[2]")
                 .setAppName("streaming-client");
@@ -41,7 +41,7 @@ public class JavaSparkStreaming {
     }
 
     public static JavaInputDStream<ConsumerRecord<String, String>> createStream(JavaStreamingContext context) {
-        // TODO Step 6_2
+        // TODO Step 7_2
         Collection<String> topics = Collections.singletonList("winterfell");
 
         Map<String, Object> kafkaParams = new HashMap<>();

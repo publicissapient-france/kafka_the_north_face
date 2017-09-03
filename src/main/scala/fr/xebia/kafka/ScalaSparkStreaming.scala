@@ -19,7 +19,7 @@ object ScalaSparkStreaming {
     val streamingContext = createStreamContext()
     val stream = createStream(streamingContext)
 
-    // TODO Step 6_3
+    // TODO Step 7_3
     stream.map(_.value())
       .map(extractValueFromRecord)
       .foreachRDD(rdd => displayAvg(rdd))
@@ -29,7 +29,7 @@ object ScalaSparkStreaming {
   }
 
   def createStreamContext(): StreamingContext = {
-    // TODO Step 6_1
+    // TODO Step 7_1
     val conf = new SparkConf()
       .setMaster("local[2]")
       .setAppName("kafka-spark-streaming")
@@ -38,7 +38,7 @@ object ScalaSparkStreaming {
   }
 
   def createStream(context: StreamingContext): InputDStream[ConsumerRecord[String, String]] = {
-    // TODO Step 6_2
+    // TODO Step 7_2
     val kafkaParams = Map[String, Object](
       "bootstrap.servers" -> "localhost:9092,localhost:9093",
       "key.deserializer" -> classOf[StringDeserializer],
